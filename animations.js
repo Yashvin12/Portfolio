@@ -664,85 +664,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ══════════════════════════════════════════════════
-     TECH ORBIT SYSTEM
+     TECH STACK UNIVERSE
   ══════════════════════════════════════════════════ */
-  function initTechOrbit() {
-    const container = document.getElementById('orbit-system');
-    if (!container) return;
+  // Tech orbit removed — replaced by techstack-universe.js WebGL engine
 
-    const size = container.offsetWidth;
-    const RADII   = [size * .182, size * .302, size * .435];
-    const SPEEDS  = [.38, .26, .16];
-
-    const techs = [
-      // Inner orbit
-      { name:'Python',     abbr:'PY',   color:'#3776ab', orbit:0 },
-      { name:'React',      abbr:'RE⚛',  color:'#61dafb', orbit:0 },
-      { name:'TypeScript', abbr:'TS',   color:'#3178c6', orbit:0 },
-      { name:'TensorFlow', abbr:'TF',   color:'#ff6f00', orbit:0 },
-      // Middle orbit
-      { name:'Next.js',    abbr:'NX',   color:'#ffffff', orbit:1 },
-      { name:'Three.js',   abbr:'3D',   color:'#ff6040', orbit:1 },
-      { name:'GSAP',       abbr:'GS',   color:'#88ce02', orbit:1 },
-      { name:'Node.js',    abbr:'NO',   color:'#339933', orbit:1 },
-      { name:'MongoDB',    abbr:'MG',   color:'#47a248', orbit:1 },
-      // Outer orbit
-      { name:'JavaScript', abbr:'JS',   color:'#f7df1e', orbit:2 },
-      { name:'Flask',      abbr:'FL',   color:'#aaaaaa', orbit:2 },
-      { name:'MySQL',      abbr:'MY',   color:'#4479a1', orbit:2 },
-      { name:'Tailwind',   abbr:'TW',   color:'#06b6d4', orbit:2 },
-    ];
-
-    // Orbit rings (visual)
-    RADII.forEach(r => {
-      const ring = document.createElement('div');
-      ring.className = 'orbit-ring';
-      ring.style.cssText = `width:${r*2}px;height:${r*2}px;left:calc(50% - ${r}px);top:calc(50% - ${r}px)`;
-      container.appendChild(ring);
-    });
-
-    // Group by orbit
-    const groups = [[], [], []];
-    techs.forEach(t => groups[t.orbit].push(t));
-
-    // Create nodes
-    const nodes = techs.map(tech => {
-      const el = document.createElement('div');
-      el.className = 'tech-node';
-      el.setAttribute('data-tech', tech.name);
-      el.style.color       = tech.color;
-      el.style.borderColor = tech.color + '55';
-
-      const label   = document.createElement('span');
-      label.textContent = tech.abbr;
-
-      const tooltip = document.createElement('div');
-      tooltip.className   = 'tech-tooltip';
-      tooltip.textContent = tech.name;
-
-      el.append(label, tooltip);
-      container.appendChild(el);
-
-      return {
-        ...tech,
-        el,
-        angle: Math.random() * Math.PI * 2,
-      };
-    });
-
-    function animate() {
-      nodes.forEach(n => {
-        n.angle += SPEEDS[n.orbit] * 0.012;
-        const r = RADII[n.orbit];
-        const x = Math.cos(n.angle) * r;
-        const y = Math.sin(n.angle) * r;
-        n.el.style.left = `calc(50% + ${x}px)`;
-        n.el.style.top  = `calc(50% + ${y}px)`;
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
-  }
 
   /* ══════════════════════════════════════════════════
      TERMINAL TYPEWRITER
@@ -754,8 +679,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const lines = [
       { cmd: 'whoami',                        out: '→ Yashvin12' },
-      { cmd: 'git log --oneline | wc -l',     out: '→ 1200+ commits' },
-      { cmd: 'ls ~/repos/ | wc -l',           out: '→ 25+ repositories' },
+      { cmd: 'git log --oneline | wc -l',     out: '→ 200+ commits' },
+      { cmd: 'ls ~/repos/ | wc -l',           out: '→ 20+ repositories' },
       { cmd: 'cat ~/.languages',               out: '→ Python · JS · TS · Go' },
     ];
 
@@ -834,13 +759,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Tech orbit — init when section enters
+  // Tech Universe — init when section enters viewport (fires immediately on enter)
+  let techUniverseDestroy = null;
   ScrollTrigger.create({
     trigger: '#techstack',
-    start:   'top 75%',
+    start:   'top 100%',   // fires as soon as ANY part of the section is visible
     once:    true,
-    onEnter() { initTechOrbit(); },
+    onEnter() {
+      if (typeof window.initTechUniverse === 'function' && !techUniverseDestroy) {
+        techUniverseDestroy = window.initTechUniverse();
+      }
+    },
   });
+
+  // Heading mouse parallax — subtle depth shift on ts-heading
+  const tsHeading = document.querySelector('.ts-heading');
+  if (tsHeading) {
+    window.addEventListener('mousemove', (e) => {
+      const nx = (e.clientX / window.innerWidth)  * 2 - 1;
+      const ny = (e.clientY / window.innerHeight) * 2 - 1;
+      // Very subtle: shifts 4px in each axis, feels like letters in 3D space
+      gsap.to(tsHeading, {
+        x: nx * -4,
+        y: ny * -3,
+        duration: 1.8,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    }, { passive: true });
+  }
+
 
   // Social section — terminal + contribution canvas
   ScrollTrigger.create({
@@ -849,8 +797,6 @@ document.addEventListener('DOMContentLoaded', () => {
     once:    true,
     onEnter() {
       initTerminal();
-      const cnv = document.getElementById('contrib-canvas');
-      if (cnv) initContribCanvas(cnv);
     },
   });
 
@@ -934,93 +880,5 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(() => {
     if (Math.random() > .65) { glitch(heroN1); glitch(heroN2); }
   }, 6200);
-
-  /* ══════════════════════════════════════════════════
-     ORBIT SYSTEM (TECH STACK)
-  ══════════════════════════════════════════════════ */
-  (function initOrbit() {
-    const container = document.getElementById('orbit-system');
-    if (!container) return;
-
-    const size = Math.min(container.offsetWidth, 600);
-    const RADII  = [size * 0.167, size * 0.267, size * 0.375];
-    const SPEEDS = [0.5, 0.3, 0.18];
-
-    const techs = [
-      // Inner
-      { icon:'devicon-python-plain', name:'Python', orbit:0 },
-      { icon:'devicon-javascript-plain', name:'JavaScript', orbit:0 },
-      { icon:'devicon-typescript-plain', name:'TypeScript', orbit:0 },
-      { icon:'devicon-react-original', name:'React', orbit:0 },
-      { icon:'devicon-nextjs-plain', name:'Next.js', orbit:0 },
-      
-      // Middle
-      { icon:'devicon-pandas-plain', name:'Pandas', orbit:1 },
-      { icon:'devicon-numpy-original', name:'NumPy', orbit:1 },
-      { icon:'devicon-tensorflow-original', name:'TensorFlow', orbit:1 },
-      { icon:'devicon-scikitlearn-original', name:'scikit-learn', orbit:1 },
-      { icon:'devicon-fastapi-plain', name:'FastAPI', orbit:1 },
-      { icon:'devicon-nodejs-plain', name:'Node.js', orbit:1 },
-      
-      // Outer
-      { icon:'devicon-postgresql-plain', name:'PostgreSQL', orbit:2 },
-      { icon:'devicon-mongodb-plain', name:'MongoDB', orbit:2 },
-      { icon:'devicon-docker-plain', name:'Docker', orbit:2 },
-      { icon:'devicon-amazonwebservices-original', name:'AWS', orbit:2 },
-      { icon:'devicon-tailwindcss-original', name:'TailwindCSS', orbit:2 },
-      { icon:'devicon-threejs-original', name:'Three.js', orbit:2 },
-    ];
-
-    // Draw rings
-    RADII.forEach(r => {
-      const ring = document.createElement('div');
-      ring.className = 'orbit-ring';
-      ring.style.width = ring.style.height = `${r * 2}px`;
-      container.appendChild(ring);
-    });
-
-    const groups = [[],[],[]];
-    techs.forEach(t => groups[t.orbit].push(t));
-
-    const nodes = techs.map((tech, i) => {
-      const el = document.createElement('div');
-      el.className = 'orbit-item';
-      el.innerHTML = `<i class="${tech.icon}"></i><span class="name">${tech.name}</span>`;
-      
-      // Click logic to expand and scale up
-      el.addEventListener('click', () => {
-        document.querySelectorAll('.orbit-item.expanded').forEach(n => {
-          if (n !== el) n.classList.remove('expanded');
-        });
-        el.classList.toggle('expanded');
-      });
-      
-      container.appendChild(el);
-      return {
-        ...tech,
-        el,
-        angle: (groups[tech.orbit].indexOf(tech) / groups[tech.orbit].length) * Math.PI * 2,
-      };
-    });
-
-    function animate() {
-      nodes.forEach(n => {
-        n.angle += SPEEDS[n.orbit] * 0.01;
-        const r = RADII[n.orbit];
-        const x = Math.cos(n.angle) * r;
-        const y = Math.sin(n.angle) * r;
-        n.el.style.left = `calc(50% + ${x}px)`;
-        n.el.style.top  = `calc(50% + ${y}px)`;
-        
-        let baseScale = 1 - n.orbit * 0.08;
-        if (n.el.classList.contains('expanded')) {
-          baseScale *= 1.4; // Make it 40% bigger when expanded
-        }
-        n.el.style.transform = `translate(-50%, -50%) scale(${baseScale})`;
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
-  })();
 
 }); // end DOMContentLoaded

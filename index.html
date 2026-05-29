@@ -73,7 +73,7 @@
         <span class="line-mask"><span class="hero-name-row" id="hero-n2">MEHRA</span></span>
       </h1>
 
-      <p class="hero-role" id="hero-role">AI <span class="amp">&amp;</span> Data Science Engineer</p>
+      <p class="hero-role" id="hero-role">AI <span class="amp">&amp;</span> Full Stack Developer</p>
       <p class="hero-sub"  id="hero-sub">Building futuristic digital experiences powered by AI,<br class="br-d"> design, and engineering.</p>
 
       <div class="hero-ctas" id="hero-ctas">
@@ -199,23 +199,179 @@
     </div>
   </section>
 
-  <!-- ══════════════════════════════════════════════════
-       02 — TECH STACK
-  ══════════════════════════════════════════════════ -->
-  <section class="techstack" id="techstack" aria-label="Technology Stack">
-    <div class="container">
-      <header class="section-header" data-reveal>
+  <section class="techstack" id="techstack" aria-label="Technology Stack Universe">
+
+    <!-- Sticky viewport -->
+    <div class="techstack-sticky" id="techstack-sticky">
+
+      <!-- Full-viewport WebGL canvas -->
+      <canvas id="techstack-canvas" class="techstack-canvas" aria-hidden="true"></canvas>
+
+      <!-- CSS postprocessing overlays -->
+      <div class="ts-scanlines"   aria-hidden="true"></div>
+      <div class="ts-vignette"    aria-hidden="true"></div>
+      <div class="ts-grain"       aria-hidden="true"></div>
+
+      <!-- Animated section header -->
+      <header class="ts-header">
+        <div class="ts-header-scan" aria-hidden="true"></div>
         <span class="section-eyebrow">02 — Tech Arsenal</span>
-        <h2 class="section-heading">The tools that<br>build the future.</h2>
+        <h2 class="ts-heading">Building intelligent<br>systems for the<br>next digital era.</h2>
+        <p class="ts-subline">20 technologies · 6 domains</p>
+        <div class="ts-live-badge" aria-hidden="true">
+          <span class="ts-live-dot"></span>
+          <span class="ts-live-text">Systems online</span>
+        </div>
+        
+        <!-- Category legend moved inside header for natural flow -->
+        <ul class="ts-legend" aria-hidden="true">
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#00d4ff;background:#00d4ff"></span>
+            <span>Frontend</span>
+          </li>
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#8b5cf6;background:#8b5cf6"></span>
+            <span>AI / ML</span>
+          </li>
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#10b981;background:#10b981"></span>
+            <span>LLM / RAG</span>
+          </li>
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#22c55e;background:#22c55e"></span>
+            <span>Backend</span>
+          </li>
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#3b82f6;background:#3b82f6"></span>
+            <span>Databases</span>
+          </li>
+          <li class="ts-legend-item">
+            <span class="ts-legend-dot" style="color:#f59e0b;background:#f59e0b"></span>
+            <span>DevOps</span>
+          </li>
+        </ul>
       </header>
-    </div>
-    <div class="orbit-system" id="orbit-system" aria-label="Orbiting technology icons">
-      <div class="orbit-center">
-        <div class="orbit-core"></div>
-        <div class="orbit-core-label">Stack</div>
+
+      <!-- Hover Tooltip -->
+      <div id="tech-tooltip" class="tech-tooltip" aria-hidden="true">
+        <div class="tt-cat" id="tt-cat"></div>
+        <div class="tt-name" id="tt-name"></div>
+        <div class="tt-hint">Click to inspect</div>
       </div>
-    </div>
+
+      <!-- Scroll hint strip -->
+      <div class="ts-scroll-hint" aria-hidden="true">
+        <span class="ts-scroll-label">Hover a node</span>
+        <div class="ts-scroll-line"></div>
+      </div>
+
+      <!-- Node hover hint -->
+      <div class="ts-node-hint" aria-hidden="true">
+        <span class="ts-node-hint-dot"></span>
+        <span class="ts-node-hint-text">Hover any node to activate module</span>
+      </div>
+
+      <!-- Click-reveal panel — Cinematic Holographic Inspection Module -->
+      <aside id="tech-reveal" class="tech-reveal" aria-live="polite" aria-label="Technology detail">
+
+        <!-- ── Ambient background layers ── -->
+        <div class="tr-bg-grid"    aria-hidden="true"></div>
+        <div class="tr-bg-nebula"  aria-hidden="true"></div>
+        <canvas id="tr-bg-canvas" class="tr-bg-canvas" aria-hidden="true"></canvas>
+
+        <!-- ── Scan lines ── -->
+        <div class="tr-scan-line" aria-hidden="true"></div>
+        <div class="tr-scan-line tr-scan-line--2" aria-hidden="true"></div>
+
+        <!-- ── Holographic corner accents ── -->
+        <div class="tr-corner tr-corner--tl" aria-hidden="true"></div>
+        <div class="tr-corner tr-corner--tr" aria-hidden="true"></div>
+        <div class="tr-corner tr-corner--bl" aria-hidden="true"></div>
+        <div class="tr-corner tr-corner--br" aria-hidden="true"></div>
+
+        <!-- ── Panel glow edge ── -->
+        <div class="tr-glow-edge" aria-hidden="true"></div>
+
+        <!-- ── SECTION 1: Category Label ── -->
+        <div class="tr-cat-bar">
+          <span class="tr-cat-dot" aria-hidden="true">
+            <span class="tr-cat-dot-ring" aria-hidden="true"></span>
+          </span>
+          <span id="tr-cat" class="tr-cat">SYSTEM</span>
+          <span class="tr-cat-pulse" aria-hidden="true"></span>
+        </div>
+
+        <!-- ── SECTION 2: Tech Title ── -->
+        <div class="tr-title-block">
+          <h3 id="tr-name" class="tr-name" aria-label="Technology name"></h3>
+          <div class="tr-title-glow" aria-hidden="true"></div>
+        </div>
+
+        <!-- ── SECTION 3: Holographic Visual ── -->
+        <div class="tr-holo-viewport" id="tr-holo-viewport">
+          <canvas id="tr-holo-canvas" class="tr-holo-canvas" aria-hidden="true"></canvas>
+          <div class="tr-holo-scanbar" aria-hidden="true"></div>
+          <div class="tr-holo-grid" aria-hidden="true"></div>
+          <div class="tr-holo-glow" id="tr-holo-glow" aria-hidden="true"></div>
+          <div class="tr-holo-label" id="tr-holo-label" aria-hidden="true">HOLOGRAPHIC MODEL</div>
+        </div>
+
+        <!-- ── Description ── -->
+        <p id="tr-desc" class="tr-desc">Select a technology node to initialize module</p>
+
+        <!-- ── SECTION 4: Live Code ── -->
+        <div class="tr-code-wrap">
+          <div class="tr-code-header">
+            <div class="tr-code-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            <span class="tr-code-tag" id="tr-code-tag">// initializing...</span>
+            <div class="tr-code-blink" aria-hidden="true"></div>
+          </div>
+          <div class="tr-code-body">
+            <pre id="tr-code" class="tr-code"></pre>
+            <div class="tr-code-glow-overlay" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- ── SECTION 5: Metadata Cards ── -->
+        <div class="tr-meta-grid" id="tr-meta-grid" aria-live="polite"></div>
+
+        <!-- ── Proficiency bar ── -->
+        <div class="tr-proficiency-wrap">
+          <div class="tr-proficiency-header">
+            <span class="tr-stat-lbl">PROFICIENCY MATRIX</span>
+            <span id="tr-proficiency-val" class="tr-proficiency-val">—</span>
+          </div>
+          <div class="tr-proficiency-track">
+            <div id="tr-proficiency-bar" class="tr-proficiency-bar">
+              <div class="tr-prof-shimmer" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Live waveform ── -->
+        <div class="tr-wave-wrap">
+          <canvas id="tr-wave" class="tr-wave" aria-hidden="true"></canvas>
+          <span class="tr-wave-label">signal strength</span>
+          <div class="tr-wave-peaks" id="tr-wave-peaks" aria-hidden="true"></div>
+        </div>
+
+        <!-- ── SECTION 6: Compatibility Links ── -->
+        <div class="tr-compat-section">
+          <div class="tr-compat-header">
+            <span class="tr-stat-lbl">NEURAL CONNECTIONS</span>
+            <div class="tr-compat-line" aria-hidden="true"></div>
+          </div>
+          <div class="tr-compat-nodes" id="tr-compat-nodes"></div>
+        </div>
+
+        <!-- ── Floating particles canvas ── -->
+        <canvas id="tr-particles" class="tr-particles" aria-hidden="true"></canvas>
+
+      </aside>
+
+    </div><!-- /techstack-sticky -->
   </section>
+
 
   <!-- ══════════════════════════════════════════════════
        03 — CONNECT (GitHub + LinkedIn)
@@ -239,10 +395,6 @@
           </div>
           <div class="terminal-body" id="terminal-body" aria-label="Developer terminal showing GitHub stats">
           </div>
-          <div class="contrib-wrap">
-            <p class="contrib-label">Contribution activity</p>
-            <canvas id="contrib-canvas" aria-label="GitHub contribution graph"></canvas>
-          </div>
           <a href="https://github.com/Yashvin12" target="_blank" rel="noopener" class="panel-cta" id="link-github">
             View GitHub Profile <span aria-hidden="true">→</span>
           </a>
@@ -256,7 +408,7 @@
             <div class="li-initials">YM</div>
           </div>
           <h3 class="li-name">Yashvin Mehra</h3>
-          <p class="li-role">AI &amp; Data Science Engineer</p>
+          <p class="li-role">AI &amp; Full Stack Developer</p>
           <p class="li-location">India &nbsp;·&nbsp; Technology &amp; AI</p>
           <div class="li-stats">
             <div class="li-stat">
@@ -316,7 +468,7 @@
               <div class="rdoc-accent-bar"></div>
               <div class="rdoc-header-block">
                 <div class="rdoc-name">YASHVIN MEHRA</div>
-                <div class="rdoc-role">AI &amp; Data Science Engineer</div>
+                <div class="rdoc-role">AI &amp; Full Stack Developer</div>
               </div>
               <div class="rdoc-body">
                 <div class="rdoc-line rdoc-line--full"></div>
@@ -379,6 +531,19 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+
+  <!-- Three.js Postprocessing -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/BokehPass.js"></script>
+
+  <!-- Tech Stack Universe Engine -->
+  <script src="techstack-universe.js"></script>
+
   <script src="animations.js"></script>
 
 </body>
