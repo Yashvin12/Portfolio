@@ -935,4 +935,92 @@ document.addEventListener('DOMContentLoaded', () => {
     if (Math.random() > .65) { glitch(heroN1); glitch(heroN2); }
   }, 6200);
 
+  /* ══════════════════════════════════════════════════
+     ORBIT SYSTEM (TECH STACK)
+  ══════════════════════════════════════════════════ */
+  (function initOrbit() {
+    const container = document.getElementById('orbit-system');
+    if (!container) return;
+
+    const size = Math.min(container.offsetWidth, 600);
+    const RADII  = [size * 0.167, size * 0.267, size * 0.375];
+    const SPEEDS = [0.5, 0.3, 0.18];
+
+    const techs = [
+      // Inner
+      { icon:'devicon-python-plain', name:'Python', orbit:0 },
+      { icon:'devicon-javascript-plain', name:'JavaScript', orbit:0 },
+      { icon:'devicon-typescript-plain', name:'TypeScript', orbit:0 },
+      { icon:'devicon-react-original', name:'React', orbit:0 },
+      { icon:'devicon-nextjs-plain', name:'Next.js', orbit:0 },
+      
+      // Middle
+      { icon:'devicon-pandas-plain', name:'Pandas', orbit:1 },
+      { icon:'devicon-numpy-original', name:'NumPy', orbit:1 },
+      { icon:'devicon-tensorflow-original', name:'TensorFlow', orbit:1 },
+      { icon:'devicon-scikitlearn-original', name:'scikit-learn', orbit:1 },
+      { icon:'devicon-fastapi-plain', name:'FastAPI', orbit:1 },
+      { icon:'devicon-nodejs-plain', name:'Node.js', orbit:1 },
+      
+      // Outer
+      { icon:'devicon-postgresql-plain', name:'PostgreSQL', orbit:2 },
+      { icon:'devicon-mongodb-plain', name:'MongoDB', orbit:2 },
+      { icon:'devicon-docker-plain', name:'Docker', orbit:2 },
+      { icon:'devicon-amazonwebservices-original', name:'AWS', orbit:2 },
+      { icon:'devicon-tailwindcss-original', name:'TailwindCSS', orbit:2 },
+      { icon:'devicon-threejs-original', name:'Three.js', orbit:2 },
+    ];
+
+    // Draw rings
+    RADII.forEach(r => {
+      const ring = document.createElement('div');
+      ring.className = 'orbit-ring';
+      ring.style.width = ring.style.height = `${r * 2}px`;
+      container.appendChild(ring);
+    });
+
+    const groups = [[],[],[]];
+    techs.forEach(t => groups[t.orbit].push(t));
+
+    const nodes = techs.map((tech, i) => {
+      const el = document.createElement('div');
+      el.className = 'orbit-item';
+      el.innerHTML = `<i class="${tech.icon}"></i><span class="name">${tech.name}</span>`;
+      
+      // Click logic to expand and scale up
+      el.addEventListener('click', () => {
+        document.querySelectorAll('.orbit-item.expanded').forEach(n => {
+          if (n !== el) n.classList.remove('expanded');
+        });
+        el.classList.toggle('expanded');
+      });
+      
+      container.appendChild(el);
+      return {
+        ...tech,
+        el,
+        angle: (groups[tech.orbit].indexOf(tech) / groups[tech.orbit].length) * Math.PI * 2,
+      };
+    });
+
+    function animate() {
+      nodes.forEach(n => {
+        n.angle += SPEEDS[n.orbit] * 0.01;
+        const r = RADII[n.orbit];
+        const x = Math.cos(n.angle) * r;
+        const y = Math.sin(n.angle) * r;
+        n.el.style.left = `calc(50% + ${x}px)`;
+        n.el.style.top  = `calc(50% + ${y}px)`;
+        
+        let baseScale = 1 - n.orbit * 0.08;
+        if (n.el.classList.contains('expanded')) {
+          baseScale *= 1.4; // Make it 40% bigger when expanded
+        }
+        n.el.style.transform = `translate(-50%, -50%) scale(${baseScale})`;
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
+
 }); // end DOMContentLoaded
