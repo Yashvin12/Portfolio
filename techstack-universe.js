@@ -79,7 +79,7 @@ window.initTechUniverse = (function () {
       years: '2y', projects: '6+', role: 'Classical ML', proficiency: 87,
       code: 'clf = RandomForestClassifier(\n  n_estimators=200,\n  max_depth=8)\nclf.fit(X_train, y_train)\nacc = clf.score(X_test, y_test)',
       desc: 'Industry-standard classical ML — from regression to ensemble methods.',
-      holoType: 'forest',
+      holoType: 'node',
       connects: ['Python', 'NumPy', 'Pandas', 'SciPy'] },
 
     { name: 'OpenCV',         cat: 'AI / ML',     color: 0x5c3ee8, accent: '#a78bfa', accentRgb: '167,139,250',
@@ -2585,22 +2585,22 @@ window.initTechUniverse = (function () {
        DETAIL PANEL — spring-driven, holographic, 7 sections
     ═══════════════════════════════════════════════════════ */
     const panel        = document.getElementById('tech-reveal');
-    const panelName    = document.getElementById('tr-name');
-    const panelCat     = document.getElementById('tr-cat');
-    const panelCode    = document.getElementById('tr-code');
-    const panelCodeTag = document.getElementById('tr-code-tag');
-    const panelDesc    = document.getElementById('tr-desc');
-    const panelWave    = document.getElementById('tr-wave');
-    const panelProf    = document.getElementById('tr-proficiency-bar');
-    const panelProfLbl = document.getElementById('tr-proficiency-val');
-    const panelParts   = document.getElementById('tr-particles');
-    const panelMetaGrid = document.getElementById('tr-meta-grid');
-    const panelCompat   = document.getElementById('tr-compat-nodes');
+    let panelName      = null;
+    let panelCat       = null;
+    let panelCode      = null;
+    let panelCodeTag   = null;
+    let panelDesc      = null;
+    let panelWave      = null;
+    let panelProf      = null;
+    let panelProfLbl   = null;
+    let panelParts     = null;
+    let panelMetaGrid  = null;
+    let panelCompat    = null;
 
-    let panelOpacitySpring = makeSpring(0, 140, 20);
-    let panelXSpring       = makeSpring(60, 160, 22);
-    let panelTiltSpring    = makeSpring(-8, 160, 22);
-    let panelZSpring       = makeSpring(-30, 160, 22);
+    /* FIX: reduced initial x from 500→60 (shorter slide), stiffer springs
+       so panel appears within ~8 frames instead of ~40 */
+    let panelOpacitySpring = makeSpring(0,  220, 26);
+    let panelXSpring       = makeSpring(60, 220, 26);
     let panelVisible = false;
 
     /* ── Panel floating particles ── */
@@ -2813,9 +2813,9 @@ window.initTechUniverse = (function () {
         panelMetaGrid.appendChild(card);
       });
     }
-
     /* ── Open / close panel ── */
     function openPanel(tech, catColor, locked) {
+      /* Open panel (hover or click) */
       const accent    = tech.accent    || catColor.label;
       const accentRgb = tech.accentRgb || catColor.rgb || '97,218,251';
       const accent2   = tech.accent2   || accent;
@@ -2830,6 +2830,24 @@ window.initTechUniverse = (function () {
       if (hintEl) hintEl.style.opacity = '0';
 
       if (panel) {
+        // Inject Dynamic Template
+        if (window.getPanelTemplate) {
+          panel.innerHTML = window.getPanelTemplate(tech, accentRgb, accent);
+        }
+        
+        // Re-query Elements
+        panelName      = panel.querySelector('#tr-name');
+        panelCat       = panel.querySelector('#tr-cat');
+        panelCode      = panel.querySelector('#tr-code');
+        panelCodeTag   = panel.querySelector('#tr-code-tag');
+        panelDesc      = panel.querySelector('#tr-desc');
+        panelWave      = panel.querySelector('#tr-wave');
+        panelProf      = panel.querySelector('#tr-proficiency-bar');
+        panelProfLbl   = panel.querySelector('#tr-proficiency-val');
+        panelParts     = panel.querySelector('#tr-particles');
+        panelMetaGrid  = panel.querySelector('#tr-meta-grid');
+        panelCompat    = panel.querySelector('#tr-compat-nodes');
+        
         panel.style.setProperty('--accent',     accent);
         panel.style.setProperty('--accent-rgb', accentRgb);
         panel.style.setProperty('--accent-dark', catColor.dark);
@@ -2886,7 +2904,7 @@ window.initTechUniverse = (function () {
     function closePanel() {
       panelVisible = false;
       panelOpacitySpring.target = 0;
-      panelXSpring.target       = 60;
+      panelXSpring.target       = 500;
       if (panel) panel.classList.remove('is-open');
       stopWave(); stopPanelParticles(); stopHoloCanvas();
       if (codeTypingRAF) clearTimeout(codeTypingRAF);
@@ -3201,13 +3219,18 @@ window.initTechUniverse = (function () {
     }
 
     /* ── Render loop ── */
+    /* FIX: clock.getElapsedTime() internally calls getDelta() which resets
+       _oldTime, so calling getDelta() AFTER returns ~0 every frame —
+       killing all spring physics. Call getDelta() FIRST, then read elapsedTime. */
     function tick() {
       animFrameId = requestAnimationFrame(tick);
-      const t  = clock.getElapsedTime();
       const dt = Math.min(clock.getDelta(), 0.05);
+      const t  = clock.elapsedTime;
       globalUniforms.uTime.value = t;
 
-      entryProgress = Math.min(1, t / 3.5);
+      /* FIX: reduced from 3.5s→1.0s so hover interactions become
+         responsive quickly without a 3+ second dead zone */
+      entryProgress = Math.min(1, t / 1.0);
       if (entryProgress < 1 && hoveredIdx === -1 && !isHoverLocked) {
         camSpring.z.target = lerpClamped(40, 26, entryProgress);
         camSpring.x.target = lerpClamped(3, 1.5, entryProgress);
@@ -3316,18 +3339,9 @@ window.initTechUniverse = (function () {
       if (panel) {
         const op = tickSpring(panelOpacitySpring, dt);
         const px = tickSpring(panelXSpring, dt);
-        /* Scale spring: panel "pops" in from slightly smaller */
-        if (!panelOpacitySpring._scaleSpring) panelOpacitySpring._scaleSpring = makeSpring(0.92, 200, 22);
-        panelOpacitySpring._scaleSpring.target = panelVisible ? 1.0 : 0.92;
-        const sc = tickSpring(panelOpacitySpring._scaleSpring, dt);
-        panelTiltSpring.target = panelVisible ? (-6 + mouse3D.x * -6) : -12;
-        panelZSpring.target = panelVisible ? (isHoverLocked ? 24 : 16) : -30;
-        const tilt = tickSpring(panelTiltSpring, dt);
-        const pz = tickSpring(panelZSpring, dt);
         panel.style.opacity   = Math.max(0, Math.min(1, op)).toFixed(3);
-        panel.style.transform = `translateY(-50%) translateX(${px.toFixed(2)}px) translateZ(${pz.toFixed(2)}px) rotateY(${tilt.toFixed(2)}deg) scale(${sc.toFixed(4)})`;
+        panel.style.transform = `translateX(${px.toFixed(2)}px)`;
         panel.style.pointerEvents = op > 0.1 ? 'auto' : 'none';
-        panel.style.transformOrigin = 'right center';
       }
 
       if (composer) composer.render();

@@ -17,6 +17,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="panel-templates.css" />
 </head>
 <body>
 
@@ -273,100 +274,7 @@
 
       <!-- Click-reveal panel — Cinematic Holographic Inspection Module -->
       <aside id="tech-reveal" class="tech-reveal" aria-live="polite" aria-label="Technology detail">
-
-        <!-- ── Ambient background layers ── -->
-        <div class="tr-bg-grid"    aria-hidden="true"></div>
-        <div class="tr-bg-nebula"  aria-hidden="true"></div>
-        <canvas id="tr-bg-canvas" class="tr-bg-canvas" aria-hidden="true"></canvas>
-
-        <!-- ── Scan lines ── -->
-        <div class="tr-scan-line" aria-hidden="true"></div>
-        <div class="tr-scan-line tr-scan-line--2" aria-hidden="true"></div>
-
-        <!-- ── Holographic corner accents ── -->
-        <div class="tr-corner tr-corner--tl" aria-hidden="true"></div>
-        <div class="tr-corner tr-corner--tr" aria-hidden="true"></div>
-        <div class="tr-corner tr-corner--bl" aria-hidden="true"></div>
-        <div class="tr-corner tr-corner--br" aria-hidden="true"></div>
-
-        <!-- ── Panel glow edge ── -->
-        <div class="tr-glow-edge" aria-hidden="true"></div>
-
-        <!-- ── SECTION 1: Category Label ── -->
-        <div class="tr-cat-bar">
-          <span class="tr-cat-dot" aria-hidden="true">
-            <span class="tr-cat-dot-ring" aria-hidden="true"></span>
-          </span>
-          <span id="tr-cat" class="tr-cat">SYSTEM</span>
-          <span class="tr-cat-pulse" aria-hidden="true"></span>
-        </div>
-
-        <!-- ── SECTION 2: Tech Title ── -->
-        <div class="tr-title-block">
-          <h3 id="tr-name" class="tr-name" aria-label="Technology name"></h3>
-          <div class="tr-title-glow" aria-hidden="true"></div>
-        </div>
-
-        <!-- ── SECTION 3: Holographic Visual ── -->
-        <div class="tr-holo-viewport" id="tr-holo-viewport">
-          <canvas id="tr-holo-canvas" class="tr-holo-canvas" aria-hidden="true"></canvas>
-          <div class="tr-holo-scanbar" aria-hidden="true"></div>
-          <div class="tr-holo-grid" aria-hidden="true"></div>
-          <div class="tr-holo-glow" id="tr-holo-glow" aria-hidden="true"></div>
-          <div class="tr-holo-label" id="tr-holo-label" aria-hidden="true">HOLOGRAPHIC MODEL</div>
-        </div>
-
-        <!-- ── Description ── -->
-        <p id="tr-desc" class="tr-desc">Select a technology node to initialize module</p>
-
-        <!-- ── SECTION 4: Live Code ── -->
-        <div class="tr-code-wrap">
-          <div class="tr-code-header">
-            <div class="tr-code-dots" aria-hidden="true"><span></span><span></span><span></span></div>
-            <span class="tr-code-tag" id="tr-code-tag">// initializing...</span>
-            <div class="tr-code-blink" aria-hidden="true"></div>
-          </div>
-          <div class="tr-code-body">
-            <pre id="tr-code" class="tr-code"></pre>
-            <div class="tr-code-glow-overlay" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <!-- ── SECTION 5: Metadata Cards ── -->
-        <div class="tr-meta-grid" id="tr-meta-grid" aria-live="polite"></div>
-
-        <!-- ── Proficiency bar ── -->
-        <div class="tr-proficiency-wrap">
-          <div class="tr-proficiency-header">
-            <span class="tr-stat-lbl">PROFICIENCY MATRIX</span>
-            <span id="tr-proficiency-val" class="tr-proficiency-val">—</span>
-          </div>
-          <div class="tr-proficiency-track">
-            <div id="tr-proficiency-bar" class="tr-proficiency-bar">
-              <div class="tr-prof-shimmer" aria-hidden="true"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── Live waveform ── -->
-        <div class="tr-wave-wrap">
-          <canvas id="tr-wave" class="tr-wave" aria-hidden="true"></canvas>
-          <span class="tr-wave-label">signal strength</span>
-          <div class="tr-wave-peaks" id="tr-wave-peaks" aria-hidden="true"></div>
-        </div>
-
-        <!-- ── SECTION 6: Compatibility Links ── -->
-        <div class="tr-compat-section">
-          <div class="tr-compat-header">
-            <span class="tr-stat-lbl">NEURAL CONNECTIONS</span>
-            <div class="tr-compat-line" aria-hidden="true"></div>
-          </div>
-          <div class="tr-compat-nodes" id="tr-compat-nodes"></div>
-        </div>
-
-        <!-- ── Floating particles canvas ── -->
-        <canvas id="tr-particles" class="tr-particles" aria-hidden="true"></canvas>
-
+        <!-- Dynamic content injected here per-category to ensure unique layouts -->
       </aside>
 
     </div><!-- /techstack-sticky -->
@@ -517,7 +425,7 @@
   <!-- ── Footer ─────────────────────────────────────── -->
   <footer class="footer" aria-label="Site footer">
     <div class="footer-inner">
-      <span class="footer-copy">© 2025 Yashvin Mehra</span>
+      <span class="footer-copy">© 2026 Yashvin Mehra</span>
       <nav class="footer-links" aria-label="Social links">
         <a href="https://github.com/Yashvin12"   target="_blank" rel="noopener" class="footer-link" id="fl-gh">GitHub</a>
         <a href="https://www.linkedin.com/in/yashvin-mehra-7a97b1322" target="_blank" rel="noopener" class="footer-link" id="fl-li">LinkedIn</a>
@@ -539,9 +447,11 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/ShaderPass.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/CopyShader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/shaders/BokehShader.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/examples/js/postprocessing/BokehPass.js"></script>
 
   <!-- Tech Stack Universe Engine -->
+  <script src="panel-templates.js"></script>
   <script src="techstack-universe.js"></script>
 
   <script src="animations.js"></script>
