@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Yashvin Mehra — AI & Creative Developer</title>
+  <meta name="description" content="Yashvin Mehra builds next-generation digital experiences — immersive 3D interfaces, AI-powered applications, and cinematic web experiences that stand apart." />
+  <meta name="author" content="Yashvin Mehra" />
+  <meta property="og:title" content="Yashvin Mehra — AI & Creative Developer" />
+  <meta property="og:description" content="Building futuristic digital experiences powered by AI, design, and engineering." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#030308" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Loading Screen ──────────────────────────────── -->
+  <div id="loader" role="status" aria-label="Loading portfolio">
+    <div class="loader-inner">
+      <div class="loader-logo">YM</div>
+      <div class="loader-track">
+        <div class="loader-bar" id="loader-bar"></div>
+      </div>
+      <span class="loader-label">Initialising experience</span>
+    </div>
+  </div>
+
+  <!-- ── Scroll Progress ────────────────────────────── -->
+  <div class="scroll-prog" id="scroll-prog" aria-hidden="true"></div>
+
+  <!-- ── Custom Cursor ──────────────────────────────── -->
+  <div id="cursor-dot"  class="cursor-dot"  aria-hidden="true"></div>
+  <div id="cursor-ring" class="cursor-ring" aria-hidden="true"></div>
+
+  <!-- ── Grain ─────────────────────────────────────── -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- ══════════════════════════════════════════════════
+       NAV
+  ══════════════════════════════════════════════════ -->
+  <nav class="nav" id="main-nav" aria-label="Primary navigation">
+    <a href="#" class="nav-brand" id="nav-brand" aria-label="Yashvin Mehra home">YM</a>
+    <ul class="nav-links" role="list">
+      <li><a href="#projects"  class="nav-link" id="nav-work">Work</a></li>
+      <li><a href="#techstack" class="nav-link" id="nav-stack">Stack</a></li>
+      <li><a href="#social"    class="nav-link" id="nav-connect">Connect</a></li>
+      <li><a href="#resume"    class="nav-link" id="nav-resume">Resume</a></li>
+      <li><a href="#contact"   class="nav-link nav-cta" id="nav-hire">Hire Me</a></li>
+    </ul>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════════════ -->
+  <section class="hero" id="hero" aria-label="Hero — Yashvin Mehra">
+    <canvas id="hero-canvas" aria-hidden="true"></canvas>
+    <div class="hero-bg" aria-hidden="true"></div>
+
+    <div class="hero-content">
+      <div class="hero-tag" id="hero-tag">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span class="status-text">Available for new projects</span>
+      </div>
+
+      <h1 class="hero-heading" aria-label="Yashvin Mehra">
+        <span class="line-mask"><span class="hero-name-row" id="hero-n1">YASHVIN</span></span>
+        <span class="line-mask"><span class="hero-name-row" id="hero-n2">MEHRA</span></span>
+      </h1>
+
+      <p class="hero-role" id="hero-role">AI <span class="amp">&amp;</span> Data Science Engineer</p>
+      <p class="hero-sub"  id="hero-sub">Building futuristic digital experiences powered by AI,<br class="br-d"> design, and engineering.</p>
+
+      <div class="hero-ctas" id="hero-ctas">
+        <a href="#projects" class="btn btn-primary" id="cta-work">View My Work</a>
+        <a href="#contact"  class="btn btn-ghost"   id="cta-contact">Get In Touch</a>
+      </div>
+    </div>
+
+    <div class="scroll-hint" id="scroll-hint" aria-hidden="true">
+      <div class="scroll-line"></div>
+      <span class="scroll-label">scroll</span>
+    </div>
+  </section>
+
+  <!-- ── Marquee ──────────────────────────────────── -->
+  <div class="marquee-wrap" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Aurum</span><span class="sep">·</span>
+      <span>NyaayPath</span><span class="sep">·</span>
+      <span>SkillLens</span><span class="sep">·</span>
+      <span>AI Engineering</span><span class="sep">·</span>
+      <span>Three.js</span><span class="sep">·</span>
+      <span>Data Science</span><span class="sep">·</span>
+      <span>Python</span><span class="sep">·</span>
+      <span>React</span><span class="sep">·</span>
+      <span>Neural Networks</span><span class="sep">·</span>
+      <span>WebGL</span><span class="sep">·</span>
+      <span>Aurum</span><span class="sep">·</span>
+      <span>NyaayPath</span><span class="sep">·</span>
+      <span>SkillLens</span><span class="sep">·</span>
+      <span>AI Engineering</span><span class="sep">·</span>
+      <span>Three.js</span><span class="sep">·</span>
+      <span>Data Science</span><span class="sep">·</span>
+      <span>Python</span><span class="sep">·</span>
+      <span>React</span><span class="sep">·</span>
+      <span>Neural Networks</span><span class="sep">·</span>
+      <span>WebGL</span><span class="sep">·</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       01 — PROJECTS
+  ══════════════════════════════════════════════════ -->
+  <section class="projects" id="projects" aria-label="Selected Projects">
+    <div class="container">
+      <header class="section-header" data-reveal>
+        <span class="section-eyebrow">01 — Projects</span>
+        <h2 class="section-heading">Work that<br>moves people.</h2>
+      </header>
+    </div>
+
+    <div class="projects-list container">
+
+      <!-- ── NYAAYPATH ──────────────────── -->
+      <article class="project-scene nyaay-scene" id="project-nyaay" aria-label="NyaayPath project">
+        <div class="ps-visual" aria-hidden="true">
+          <canvas id="nyaay-canvas"></canvas>
+          <div class="ps-badge">01</div>
+          <div class="ps-overlay nyaay-overlay"></div>
+        </div>
+        <div class="ps-content">
+          <span class="ps-eyebrow">AI × Legal-Tech</span>
+          <h3 class="ps-title">NyaayPath AI</h3>
+          <p class="ps-desc">
+            An agentic AI legal navigator for the Indian justice system. It uses a LangGraph-powered orchestrator and FastAPI backend with a Vite & React frontend to parse natural language complaints, perform vector similarity retrieval from Indian legal codes, and automatically generate formal PDFs of legal notices and consumer complaints.
+          </p>
+          <div class="ps-tags">
+            <span>React</span><span>Vite</span><span>FastAPI</span><span>LangGraph</span><span>PostgreSQL</span><span>pgvector</span><span>ReportLab</span>
+          </div>
+          <div class="ps-links">
+            <a href="https://nyaay-path-ai.vercel.app/" target="_blank" rel="noopener" class="ps-link" id="link-nyaay-live">View Live <span>→</span></a>
+            <a href="https://github.com/Yashvin12/NyaayPath-AI" target="_blank" rel="noopener" class="ps-link ps-link--ghost" id="link-nyaay-gh">GitHub <span>→</span></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── AURUM ─────────────────────── -->
+      <article class="project-scene aurum-scene" id="project-aurum" aria-label="Aurum project">
+        <div class="ps-visual" aria-hidden="true">
+          <canvas id="aurum-canvas"></canvas>
+          <div class="ps-badge">02</div>
+          <div class="ps-overlay aurum-overlay"></div>
+        </div>
+        <div class="ps-content">
+          <span class="ps-eyebrow">AI × Finance</span>
+          <h3 class="ps-title">Aurum</h3>
+          <p class="ps-desc">
+            A luxury AI wealth management platform delivering real-time portfolio analytics,
+            predictive market intelligence, and institutional-grade financial insights —
+            wrapped in a premium digital experience that feels as refined as the product itself.
+          </p>
+          <div class="ps-tags">
+            <span>React</span><span>Next.js</span><span>Three.js</span><span>TailwindCSS</span><span>Framer Motion</span>
+          </div>
+          <div class="ps-links">
+            <a href="https://github.com/Yashvin12/Aurum" target="_blank" rel="noopener" class="ps-link" id="link-aurum-gh">GitHub <span>→</span></a>
+          </div>
+        </div>
+      </article>
+
+      <!-- ── SKILLLENS ──────────────────── -->
+      <article class="project-scene skill-scene" id="project-skill" aria-label="SkillLens project">
+        <div class="ps-visual" aria-hidden="true">
+          <canvas id="skill-canvas"></canvas>
+          <div class="ps-badge">03</div>
+          <div class="ps-overlay skill-overlay"></div>
+        </div>
+        <div class="ps-content">
+          <span class="ps-eyebrow">AI × Career Intelligence</span>
+          <h3 class="ps-title">SkillLens</h3>
+          <p class="ps-desc">
+            An AI-powered resume skill gap analyzer and career recommendation system. It parses PDF resumes using PyMuPDF, extracts skills via NLP keyword mapping, ranks job descriptions using TF-IDF and cosine similarity (scikit-learn), and displays insights via Chart.js with full user authentication and database persistence.
+          </p>
+          <div class="ps-tags">
+            <span>FastAPI</span><span>Python</span><span>scikit-learn</span><span>PyMuPDF</span><span>SQLite</span><span>Chart.js</span>
+          </div>
+          <div class="ps-links">
+            <a href="https://github.com/Yashvin12/SkillLens" target="_blank" rel="noopener" class="ps-link" id="link-skill-gh">GitHub <span>→</span></a>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       02 — TECH STACK
+  ══════════════════════════════════════════════════ -->
+  <section class="techstack" id="techstack" aria-label="Technology Stack">
+    <div class="container">
+      <header class="section-header" data-reveal>
+        <span class="section-eyebrow">02 — Tech Arsenal</span>
+        <h2 class="section-heading">The tools that<br>build the future.</h2>
+      </header>
+    </div>
+    <div class="orbit-system" id="orbit-system" aria-label="Orbiting technology icons">
+      <div class="orbit-center">
+        <div class="orbit-core"></div>
+        <div class="orbit-core-label">Stack</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       03 — CONNECT (GitHub + LinkedIn)
+  ══════════════════════════════════════════════════ -->
+  <section class="social" id="social" aria-label="GitHub and LinkedIn profiles">
+    <div class="container">
+      <header class="section-header" data-reveal>
+        <span class="section-eyebrow">03 — Connect</span>
+        <h2 class="section-heading">Find me in<br>the wild.</h2>
+      </header>
+
+      <div class="social-grid">
+
+        <!-- GitHub Terminal -->
+        <div class="github-panel" id="gh-panel" data-reveal>
+          <div class="panel-header">
+            <div class="terminal-dots" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="terminal-title">~/Yashvin12 — zsh</span>
+          </div>
+          <div class="terminal-body" id="terminal-body" aria-label="Developer terminal showing GitHub stats">
+          </div>
+          <div class="contrib-wrap">
+            <p class="contrib-label">Contribution activity</p>
+            <canvas id="contrib-canvas" aria-label="GitHub contribution graph"></canvas>
+          </div>
+          <a href="https://github.com/Yashvin12" target="_blank" rel="noopener" class="panel-cta" id="link-github">
+            View GitHub Profile <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <!-- LinkedIn Card -->
+        <div class="linkedin-panel" id="li-panel" data-reveal data-delay="0.1">
+          <div class="li-glow" aria-hidden="true"></div>
+          <div class="li-avatar" aria-hidden="true">
+            <div class="li-avatar-ring"></div>
+            <div class="li-initials">YM</div>
+          </div>
+          <h3 class="li-name">Yashvin Mehra</h3>
+          <p class="li-role">AI &amp; Data Science Engineer</p>
+          <p class="li-location">India &nbsp;·&nbsp; Technology &amp; AI</p>
+          <div class="li-stats">
+            <div class="li-stat">
+              <div class="li-stat-row">
+                <span class="li-stat-n" data-count="500" id="li-connections">0</span>
+                <span class="li-stat-s">+</span>
+              </div>
+              <span class="li-stat-l">Connections</span>
+            </div>
+            <div class="li-stat">
+              <div class="li-stat-row">
+                <span class="li-stat-n" data-count="3" id="li-years">0</span>
+                <span class="li-stat-s">+</span>
+              </div>
+              <span class="li-stat-l">Years exp.</span>
+            </div>
+            <div class="li-stat">
+              <div class="li-stat-row">
+                <span class="li-stat-n" data-count="24" id="li-projects">0</span>
+                <span class="li-stat-s">+</span>
+              </div>
+              <span class="li-stat-l">Projects</span>
+            </div>
+          </div>
+          <a href="https://www.linkedin.com/in/yashvin-mehra-7a97b1322" target="_blank" rel="noopener" class="panel-cta panel-cta--li" id="link-linkedin">
+            Connect on LinkedIn <span aria-hidden="true">→</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       04 — RESUME
+  ══════════════════════════════════════════════════ -->
+  <section class="resume-section" id="resume" aria-label="Resume">
+    <div class="container">
+      <div class="resume-inner">
+
+        <div class="resume-content" data-reveal>
+          <span class="section-eyebrow">04 — Resume</span>
+          <h2 class="section-heading">The full picture<br>in one document.</h2>
+          <p class="resume-sub">
+            3 years of AI engineering, web development, and product thinking —
+            distilled to what actually matters.
+          </p>
+          <a href="#" class="btn btn-primary" id="btn-resume" download aria-label="Download Yashvin Mehra's resume">
+            Download Resume
+            <span class="btn-icon" aria-hidden="true">↓</span>
+          </a>
+        </div>
+
+        <div class="resume-visual" data-reveal data-delay="0.12" aria-hidden="true">
+          <div class="resume-doc" id="resume-doc">
+            <div class="rdoc rdoc--1">
+              <div class="rdoc-accent-bar"></div>
+              <div class="rdoc-header-block">
+                <div class="rdoc-name">YASHVIN MEHRA</div>
+                <div class="rdoc-role">AI &amp; Data Science Engineer</div>
+              </div>
+              <div class="rdoc-body">
+                <div class="rdoc-line rdoc-line--full"></div>
+                <div class="rdoc-line rdoc-line--wide"></div>
+                <div class="rdoc-line rdoc-line--mid"></div>
+                <div class="rdoc-gap"></div>
+                <div class="rdoc-line rdoc-line--full"></div>
+                <div class="rdoc-line rdoc-line--wide"></div>
+                <div class="rdoc-line rdoc-line--narrow"></div>
+                <div class="rdoc-gap"></div>
+                <div class="rdoc-line rdoc-line--full"></div>
+                <div class="rdoc-line rdoc-line--mid"></div>
+              </div>
+            </div>
+            <div class="rdoc rdoc--2"></div>
+            <div class="rdoc rdoc--3"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════
+       05 — CONTACT
+  ══════════════════════════════════════════════════ -->
+  <section class="contact" id="contact" aria-label="Contact Yashvin Mehra">
+    <div class="contact-glow" aria-hidden="true"></div>
+    <div class="contact-inner">
+      <div class="contact-content" data-reveal>
+        <span class="section-eyebrow">05 — Contact</span>
+        <h2 class="contact-heading">
+          Let's build<br>the impossible.
+        </h2>
+        <p class="contact-sub">
+          Open to full-time roles, freelance engagements,<br>
+          and ideas too ambitious for a brief.
+        </p>
+        <a href="mailto:yashvin@example.com" class="btn btn-primary btn-xl" id="cta-email" aria-label="Email Yashvin Mehra">
+          Say hello <span class="btn-arrow" aria-hidden="true">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────── -->
+  <footer class="footer" aria-label="Site footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2025 Yashvin Mehra</span>
+      <nav class="footer-links" aria-label="Social links">
+        <a href="https://github.com/Yashvin12"   target="_blank" rel="noopener" class="footer-link" id="fl-gh">GitHub</a>
+        <a href="https://www.linkedin.com/in/yashvin-mehra-7a97b1322" target="_blank" rel="noopener" class="footer-link" id="fl-li">LinkedIn</a>
+        <a href="https://twitter.com"  target="_blank" rel="noopener" class="footer-link" id="fl-tw">Twitter</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ── Scripts ────────────────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+  <script src="animations.js"></script>
+
+</body>
+</html>
