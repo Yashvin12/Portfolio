@@ -54,7 +54,29 @@
       <li><a href="#resume"    class="nav-link" id="nav-resume">Resume</a></li>
       <li><a href="#contact"   class="nav-link nav-cta" id="nav-hire">Hire Me</a></li>
     </ul>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-mobile">
+      <span class="nav-toggle-line"></span>
+      <span class="nav-toggle-line"></span>
+      <span class="nav-toggle-line"></span>
+    </button>
   </nav>
+
+  <div class="nav-mobile" id="nav-mobile" aria-hidden="true">
+    <div class="nav-mobile-backdrop" id="nav-mobile-backdrop" aria-hidden="true"></div>
+    <div class="nav-mobile-panel" role="dialog" aria-modal="true" aria-label="Mobile navigation">
+      <div class="nav-mobile-header">
+        <span class="nav-mobile-brand">YM</span>
+        <button class="nav-mobile-close" id="nav-mobile-close" aria-label="Close menu">Close</button>
+      </div>
+      <ul class="nav-mobile-links" role="list">
+        <li><a href="#projects"  class="nav-mobile-link">Work</a></li>
+        <li><a href="#techstack" class="nav-mobile-link">Stack</a></li>
+        <li><a href="#social"    class="nav-mobile-link">Connect</a></li>
+        <li><a href="#resume"    class="nav-mobile-link">Resume</a></li>
+        <li><a href="#contact"   class="nav-mobile-link nav-mobile-cta">Hire Me</a></li>
+      </ul>
+    </div>
+  </div>
 
   <!-- ══════════════════════════════════════════════════
        HERO
@@ -278,7 +300,29 @@
       </aside>
 
     </div><!-- /techstack-sticky -->
+
+    <div class="techstack-mobile" id="techstack-mobile">
+      <div class="container">
+        <header class="section-header">
+          <span class="section-eyebrow">02 — Tech Arsenal</span>
+          <h2 class="section-heading">Building intelligent systems for the next digital era.</h2>
+          <p class="ts-mobile-subline">20 technologies · 6 domains</p>
+        </header>
+        <div class="ts-mobile-carousel" id="ts-mobile-carousel" role="list"></div>
+      </div>
+    </div>
   </section>
+
+  <div class="tech-mobile-sheet" id="tech-mobile-sheet" aria-hidden="true">
+    <div class="tech-mobile-backdrop" id="tech-mobile-backdrop" aria-hidden="true"></div>
+    <div class="tech-mobile-panel" role="dialog" aria-modal="true" aria-label="Technology detail">
+      <div class="tech-mobile-panel-head">
+        <span class="tech-mobile-panel-title">Technology detail</span>
+        <button class="tech-mobile-close" id="tech-mobile-close" aria-label="Close panel">Close</button>
+      </div>
+      <div class="tech-mobile-panel-body" id="tech-mobile-panel"></div>
+    </div>
+  </div>
 
 
   <!-- ══════════════════════════════════════════════════
@@ -364,10 +408,16 @@
             3 years of AI engineering, web development, and product thinking —
             distilled to what actually matters.
           </p>
-          <a href="#" class="btn btn-primary" id="btn-resume" download aria-label="Download Yashvin Mehra's resume">
-            Download Resume
-            <span class="btn-icon" aria-hidden="true">↓</span>
-          </a>
+          <div class="resume-actions">
+            <a href="FullStack_Resume_Yashvin.pdf" class="btn btn-ghost" id="btn-resume-view" target="_blank" rel="noopener noreferrer" aria-label="View Yashvin Mehra's resume">
+              View Resume
+              <span class="btn-icon" aria-hidden="true">→</span>
+            </a>
+            <a href="FullStack_Resume_Yashvin.pdf" class="btn btn-primary" id="btn-resume" download="Yashvin_Mehra_Resume.pdf" aria-label="Download Yashvin Mehra's resume">
+              Download Resume
+              <span class="btn-icon" aria-hidden="true">↓</span>
+            </a>
+          </div>
         </div>
 
         <div class="resume-visual" data-reveal data-delay="0.12" aria-hidden="true">

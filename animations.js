@@ -12,25 +12,48 @@ document.addEventListener('DOMContentLoaded', () => {
   ══════════════════════════════════════════════════ */
   gsap.registerPlugin(ScrollTrigger);
 
+    /* ══════════════════════════════════════════════════
+      DEVICE PROFILE
+    ══════════════════════════════════════════════════ */
+    const DEVICE = (() => {
+     const ua = navigator.userAgent || '';
+     const minEdge = Math.min(window.innerWidth, window.innerHeight);
+     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+     // Use matchMedia to exactly mirror the CSS @media (max-width: 767px) breakpoint
+     // This prevents JS/CSS mismatches from DPR, soft-keyboard, or viewport quirks
+     const isMobileCSS = window.matchMedia('(max-width: 767px)').matches;
+     const isMobileUA = /Mobi|Android|iPhone|iPod/i.test(ua);
+     const isMobile = isMobileCSS || isMobileUA;
+     const isTablet = !isMobile && minEdge <= 1024;
+     const memory = navigator.deviceMemory || 4;
+     const cores = navigator.hardwareConcurrency || 4;
+     const lowPower = prefersReducedMotion || isMobile || memory <= 4 || cores <= 4;
+     return { isMobile, isTablet, isTouch, prefersReducedMotion, lowPower, memory, cores };
+    })();
+    document.documentElement.dataset.device = DEVICE.isMobile ? 'mobile' : (DEVICE.isTablet ? 'tablet' : 'desktop');
+
   /* ══════════════════════════════════════════════════
      LENIS — SMOOTH SCROLL
   ══════════════════════════════════════════════════ */
   let lenis;
-  try {
-    lenis = new Lenis({
-      duration: 1.35,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
-    });
+  if (!DEVICE.isMobile && !DEVICE.prefersReducedMotion) {
+    try {
+      lenis = new Lenis({
+        duration: 1.35,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        smoothWheel: true,
+      });
 
-    lenis.on('scroll', ScrollTrigger.update);
+      lenis.on('scroll', ScrollTrigger.update);
 
-    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-    gsap.ticker.lagSmoothing(0);
-  } catch (e) {
-    // Lenis not available — fallback to native scroll
-    console.warn('Lenis not available, using native scroll');
+      gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+      gsap.ticker.lagSmoothing(0);
+    } catch (e) {
+      // Lenis not available — fallback to native scroll
+      console.warn('Lenis not available, using native scroll');
+    }
   }
 
   /* ══════════════════════════════════════════════════
@@ -50,6 +73,63 @@ document.addEventListener('DOMContentLoaded', () => {
   const scrollProg   = document.getElementById('scroll-prog');
   const ctaEmail     = document.getElementById('cta-email');
   const resumeBtn    = document.getElementById('btn-resume');
+  const resumeViewBtn = document.getElementById('btn-resume-view');
+  const navToggle     = document.getElementById('nav-toggle');
+  const navMobile     = document.getElementById('nav-mobile');
+  const navMobileClose = document.getElementById('nav-mobile-close');
+  const navMobileBackdrop = document.getElementById('nav-mobile-backdrop');
+  const tsMobileCarousel = document.getElementById('ts-mobile-carousel');
+  const techMobileSheet = document.getElementById('tech-mobile-sheet');
+  const techMobilePanel = document.getElementById('tech-mobile-panel');
+  const techMobileClose = document.getElementById('tech-mobile-close');
+  const techMobileBackdrop = document.getElementById('tech-mobile-backdrop');
+
+  function createCanvasLoop(canvas, drawFrame) {
+    let rafId = null;
+    let isVisible = true;
+    let lastFrame = 0;
+    const frameInterval = DEVICE.lowPower ? 1000 / 30 : 1000 / 60;
+
+    if (DEVICE.prefersReducedMotion) {
+      drawFrame();
+      return () => {};
+    }
+
+    function loop(now) {
+      if (!isVisible || document.hidden) { rafId = null; return; }
+      if (now - lastFrame >= frameInterval) {
+        lastFrame = now;
+        drawFrame();
+      }
+      rafId = requestAnimationFrame(loop);
+    }
+
+    let observer = null;
+    if (canvas && 'IntersectionObserver' in window) {
+      observer = new IntersectionObserver(entries => {
+        isVisible = entries[0]?.isIntersecting ?? true;
+        if (isVisible && !rafId) {
+          lastFrame = performance.now();
+          rafId = requestAnimationFrame(loop);
+        }
+      }, { threshold: 0.2 });
+      observer.observe(canvas);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && isVisible && !rafId) {
+        lastFrame = performance.now();
+        rafId = requestAnimationFrame(loop);
+      }
+    });
+
+    rafId = requestAnimationFrame(loop);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      if (observer) observer.disconnect();
+    };
+  }
 
   /* ══════════════════════════════════════════════════
      MOUSE STATE
@@ -57,49 +137,49 @@ document.addEventListener('DOMContentLoaded', () => {
   const mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2, nx: 0, ny: 0 };
   let ringX = mouse.x, ringY = mouse.y;
   let cursorVisible = false;
+  if (!DEVICE.isTouch) {
+    window.addEventListener('mousemove', (e) => {
+      mouse.x  = e.clientX;
+      mouse.y  = e.clientY;
+      mouse.nx = (e.clientX / window.innerWidth)  * 2 - 1;
+      mouse.ny = (e.clientY / window.innerHeight) * 2 - 1;
 
-  window.addEventListener('mousemove', (e) => {
-    mouse.x  = e.clientX;
-    mouse.y  = e.clientY;
-    mouse.nx = (e.clientX / window.innerWidth)  * 2 - 1;
-    mouse.ny = (e.clientY / window.innerHeight) * 2 - 1;
+      if (!cursorVisible) {
+        cursorVisible = true;
+        gsap.to([cursorDot, cursorRing], { opacity: 1, duration: .5 });
+      }
+      gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: .08, ease: 'none' });
+    }, { passive: true });
 
-    if (!cursorVisible) {
-      cursorVisible = true;
-      gsap.to([cursorDot, cursorRing], { opacity: 1, duration: .5 });
-    }
-    gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: .08, ease: 'none' });
-  }, { passive: true });
+    // Lerp ring follow
+    (function lerpRing() {
+      ringX += (mouse.x - ringX) * 0.11;
+      ringY += (mouse.y - ringY) * 0.11;
+      gsap.set(cursorRing, { x: ringX, y: ringY });
+      requestAnimationFrame(lerpRing);
+    })();
 
-  // Lerp ring follow
-  (function lerpRing() {
-    ringX += (mouse.x - ringX) * 0.11;
-    ringY += (mouse.y - ringY) * 0.11;
-    gsap.set(cursorRing, { x: ringX, y: ringY });
-    requestAnimationFrame(lerpRing);
-  })();
-
-  // Hover states on interactive elements
-  document.querySelectorAll('a, button, [role="button"]').forEach(el => {
-    el.addEventListener('mouseenter', () => { cursorDot.classList.add('is-hover');    cursorRing.classList.add('is-hover'); });
-    el.addEventListener('mouseleave', () => { cursorDot.classList.remove('is-hover'); cursorRing.classList.remove('is-hover'); });
-  });
+    // Hover states on interactive elements
+    document.querySelectorAll('a, button, [role="button"]').forEach(el => {
+      el.addEventListener('mouseenter', () => { cursorDot.classList.add('is-hover');    cursorRing.classList.add('is-hover'); });
+      el.addEventListener('mouseleave', () => { cursorDot.classList.remove('is-hover'); cursorRing.classList.remove('is-hover'); });
+    });
+  }
 
   /* ══════════════════════════════════════════════════
      SCROLL PROGRESS BAR
   ══════════════════════════════════════════════════ */
-  function updateScrollProg() {
-    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
-    scrollProg.style.width = `${pct * 100}%`;
-  }
-  window.addEventListener('scroll', updateScrollProg, { passive: true });
+  let lastY = 0;
+  let navShown = true;
+  let scrollTicking = false;
+  let latestScrollY = window.scrollY;
 
-  /* ══════════════════════════════════════════════════
-     NAV — hide on scroll-down / show on scroll-up
-  ══════════════════════════════════════════════════ */
-  let lastY = 0, navShown = true;
-  window.addEventListener('scroll', () => {
-    const y = window.scrollY;
+  function handleScroll() {
+    const y = latestScrollY;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const pct = maxScroll > 0 ? y / maxScroll : 0;
+    scrollProg.style.width = `${pct * 100}%`;
+
     if (y > 110 && y > lastY && navShown) {
       gsap.to(mainNav, { opacity: 0, y: -14, duration: .32, ease: 'power2.in',
         onComplete: () => mainNav.style.pointerEvents = 'none' });
@@ -110,7 +190,51 @@ document.addEventListener('DOMContentLoaded', () => {
       navShown = true;
     }
     lastY = y;
+  }
+
+  window.addEventListener('scroll', () => {
+    latestScrollY = window.scrollY;
+    if (!scrollTicking) {
+      scrollTicking = true;
+      requestAnimationFrame(() => {
+        handleScroll();
+        scrollTicking = false;
+      });
+    }
   }, { passive: true });
+
+  /* ══════════════════════════════════════════════════
+     MOBILE NAV
+  ══════════════════════════════════════════════════ */
+  function openMobileNav() {
+    if (!navMobile || !navToggle) return;
+    navMobile.classList.add('is-open');
+    navMobile.setAttribute('aria-hidden', 'false');
+    navToggle.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('nav-open');
+  }
+  function closeMobileNav() {
+    if (!navMobile || !navToggle) return;
+    navMobile.classList.remove('is-open');
+    navMobile.setAttribute('aria-hidden', 'true');
+    navToggle.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('nav-open');
+  }
+
+  if (navToggle) {
+    navToggle.addEventListener('click', () => {
+      if (navMobile?.classList.contains('is-open')) closeMobileNav();
+      else openMobileNav();
+    });
+  }
+  if (navMobileBackdrop) navMobileBackdrop.addEventListener('click', closeMobileNav);
+  if (navMobileClose) navMobileClose.addEventListener('click', closeMobileNav);
+  if (navMobile) {
+    navMobile.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobileNav));
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeMobileNav();
+  });
 
   /* ══════════════════════════════════════════════════
      LOADER → HERO ENTRANCE
@@ -130,6 +254,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ease: 'power2.in',
         onComplete: () => {
           loader.style.display = 'none';
+          // Refresh ScrollTrigger after loader is removed so all scroll-based
+          // reveal animations (data-reveal, project cards, etc.) have correct
+          // viewport positions on mobile where Lenis is disabled.
+          ScrollTrigger.refresh();
           startHeroEntrance();
         },
       });
@@ -153,13 +281,27 @@ document.addEventListener('DOMContentLoaded', () => {
   (function initThree() {
     if (!window.THREE || !heroCanvas) return;
 
+    const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
+    const heroQuality = {
+      lowPower: DEVICE.lowPower,
+      prefersReducedMotion: DEVICE.prefersReducedMotion,
+      dprMin: DEVICE.isMobile ? 0.8 : (DEVICE.isTablet ? 1.0 : 1.25),
+      dprMax: DEVICE.isMobile ? 1.0 : (DEVICE.isTablet ? 1.5 : 2.0),
+    };
+
     const W = window.innerWidth;
     const H = window.innerHeight;
 
     // — Renderer —
-    const renderer = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias: true, alpha: true });
+    let currentDpr = clamp(window.devicePixelRatio || 1, heroQuality.dprMin, heroQuality.dprMax);
+    const renderer = new THREE.WebGLRenderer({
+      canvas: heroCanvas,
+      antialias: !heroQuality.lowPower,
+      alpha: true,
+      powerPreference: heroQuality.lowPower ? 'low-power' : 'high-performance',
+    });
     renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(currentDpr);
     renderer.setClearColor(0x000000, 0);
 
     // — Scene & Camera —
@@ -168,18 +310,20 @@ document.addEventListener('DOMContentLoaded', () => {
     camera.position.set(0, 0.5, 5.8);
 
     // — Lights —
-    scene.add(new THREE.AmbientLight(0x0d0526, 2));
+    const lightScale = heroQuality.lowPower ? 0.7 : 1;
+    scene.add(new THREE.AmbientLight(0x0d0526, 2 * lightScale));
 
-    const lViolet = new THREE.PointLight(0x7c5cf4, 5, 14);
-    const lCyan   = new THREE.PointLight(0x22d3ee, 3.5, 12);
-    const lRose   = new THREE.PointLight(0xff6b9d, 2.5, 10);
+    const lViolet = new THREE.PointLight(0x7c5cf4, 5 * lightScale, 14);
+    const lCyan   = new THREE.PointLight(0x22d3ee, 3.5 * lightScale, 12);
+    const lRose   = new THREE.PointLight(0xff6b9d, 2.5 * lightScale, 10);
     scene.add(lViolet, lCyan, lRose);
 
     // — Neural Globe group —
     const globeGroup = new THREE.Group();
 
     // Inner sphere (dark, subtle specular)
-    const sphereGeo = new THREE.SphereGeometry(1.2, 36, 36);
+    const sphereSegments = heroQuality.lowPower ? 24 : 36;
+    const sphereGeo = new THREE.SphereGeometry(1.2, sphereSegments, sphereSegments);
     const sphereMat = new THREE.MeshPhongMaterial({
       color:    0x0d0526,
       emissive: 0x05010f,
@@ -191,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
     globeGroup.add(new THREE.Mesh(sphereGeo, sphereMat));
 
     // Icosahedron edges (neural net look)
-    const icoGeo   = new THREE.IcosahedronGeometry(1.25, 2);
+    const icoGeo   = new THREE.IcosahedronGeometry(1.25, heroQuality.lowPower ? 1 : 2);
     const edgeGeo  = new THREE.EdgesGeometry(icoGeo);
     const edgeMat  = new THREE.LineBasicMaterial({ color: 0x5a28c8, transparent: true, opacity: 0.38 });
     globeGroup.add(new THREE.LineSegments(edgeGeo, edgeMat));
@@ -205,17 +349,18 @@ document.addEventListener('DOMContentLoaded', () => {
     scene.add(globeGroup);
 
     // Outer rings (independent)
-    const ringBase = new THREE.TorusGeometry(1.65, 0.006, 8, 110);
+    const ringSegs = heroQuality.lowPower ? 64 : 110;
+    const ringBase = new THREE.TorusGeometry(1.65, 0.006, 8, ringSegs);
     const ringMat1 = new THREE.MeshBasicMaterial({ color: 0x7c5cf4, transparent: true, opacity: 0.45 });
     const ringMat2 = new THREE.MeshBasicMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.3 });
     const ring1 = new THREE.Mesh(ringBase,                             ringMat1);
-    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.005, 8, 110), ringMat2);
+    const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.82, 0.005, 8, ringSegs), ringMat2);
     ring2.rotation.x = Math.PI / 2.3;
     ring2.rotation.y = Math.PI / 6;
     scene.add(ring1, ring2);
 
     // Particle cloud
-    const PC = 1400;
+    const PC = heroQuality.lowPower ? 420 : 1400;
     const pPos = new Float32Array(PC * 3);
     for (let i = 0; i < PC; i++) {
       const r     = 2.1 + Math.random() * 2.9;
@@ -259,10 +404,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // — rAF loop —
     const clock = new THREE.Clock();
     let tgtRotX = 0, tgtRotY = 0;
+    let heroRaf = null;
+    let heroActive = true;
+    let fpsFrames = 0;
+    let fpsElapsed = 0;
+    const timeScale = heroQuality.lowPower ? 0.8 : 1;
 
-    (function tick() {
-      requestAnimationFrame(tick);
-      const t = clock.getElapsedTime();
+    function updateAdaptiveDpr(dt) {
+      fpsFrames += 1;
+      fpsElapsed += dt;
+      if (fpsElapsed < 0.6) return;
+      const fps = fpsFrames / fpsElapsed;
+      fpsFrames = 0;
+      fpsElapsed = 0;
+      if (fps < 45 && currentDpr > heroQuality.dprMin) {
+        currentDpr = Math.max(heroQuality.dprMin, currentDpr - 0.1);
+        renderer.setPixelRatio(currentDpr);
+      } else if (fps > 58 && !heroQuality.lowPower && currentDpr < heroQuality.dprMax) {
+        currentDpr = Math.min(heroQuality.dprMax, currentDpr + 0.1);
+        renderer.setPixelRatio(currentDpr);
+      }
+    }
+
+    function tick() {
+      if (!heroActive) { heroRaf = null; return; }
+      heroRaf = requestAnimationFrame(tick);
+      const dt = clock.getDelta();
+      const t = clock.elapsedTime * timeScale;
+      updateAdaptiveDpr(dt);
 
       // Mouse-reactive tilt on globe
       tgtRotX = -mouse.ny * 0.2;
@@ -285,15 +454,41 @@ document.addEventListener('DOMContentLoaded', () => {
       lRose.position.set(  Math.sin(t * 0.28 + 2)*5,  Math.cos(t * 0.38 + 1)*2, Math.cos(t * 0.28) * 3.5);
 
       renderer.render(scene, camera);
-    })();
+    }
+
+    if (heroQuality.prefersReducedMotion) {
+      renderer.render(scene, camera);
+      return;
+    }
+
+    heroRaf = requestAnimationFrame(tick);
+
+    const heroSection = document.getElementById('hero');
+    if ('IntersectionObserver' in window && heroSection) {
+      const heroObserver = new IntersectionObserver(entries => {
+        heroActive = entries[0]?.isIntersecting ?? true;
+        if (heroActive && !heroRaf) heroRaf = requestAnimationFrame(tick);
+      }, { threshold: 0.1 });
+      heroObserver.observe(heroSection);
+    }
+    document.addEventListener('visibilitychange', () => {
+      heroActive = !document.hidden;
+      if (heroActive && !heroRaf) heroRaf = requestAnimationFrame(tick);
+    });
 
     // — Resize —
+    let resizeTimer = null;
     window.addEventListener('resize', () => {
-      const W = window.innerWidth, H = window.innerHeight;
-      camera.aspect = W / H;
-      camera.updateProjectionMatrix();
-      renderer.setSize(W, H);
-    });
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const W = window.innerWidth, H = window.innerHeight;
+        camera.aspect = W / H;
+        camera.updateProjectionMatrix();
+        currentDpr = clamp(window.devicePixelRatio || 1, heroQuality.dprMin, heroQuality.dprMax);
+        renderer.setPixelRatio(currentDpr);
+        renderer.setSize(W, H);
+      }, 120);
+    }, { passive: true });
 
   })();
 
@@ -303,6 +498,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function initAurumCanvas(canvas) {
     const ctx = canvas.getContext('2d');
     let t = 0, alive = true;
+    const isLow = DEVICE.lowPower;
+    const rings = isLow ? [
+      { r:72, speed:.18, dash:[12,8],  lw:1.4 },
+      { r:118,speed:-.12,dash:[18,10], lw:1.0 },
+    ] : [
+      { r:72, speed:.22, dash:[14,9],  lw:1.6 },
+      { r:104,speed:-.16,dash:[22,11], lw:1.1 },
+      { r:138,speed:.11, dash:[9,18],  lw:.9  },
+      { r:170,speed:-.08,dash:[6,22],  lw:.7  },
+    ];
+    const chartPts = isLow ? 22 : 32;
 
     function resize() {
       canvas.width  = canvas.offsetWidth;
@@ -327,12 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillRect(0, 0, W, H);
 
       // Rotating dashed rings
-      const rings = [
-        { r:72, speed:.22, dash:[14,9],  lw:1.6 },
-        { r:104,speed:-.16,dash:[22,11], lw:1.1 },
-        { r:138,speed:.11, dash:[9,18],  lw:.9  },
-        { r:170,speed:-.08,dash:[6,22],  lw:.7  },
-      ];
       rings.forEach(ring => {
         const grad = ctx.createLinearGradient(cx-ring.r, cy, cx+ring.r, cy);
         grad.addColorStop(0,   'rgba(180,130,10,.4)');
@@ -354,7 +554,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // Chart line (upward trend with wave noise)
-      const PTS = 32;
+      const PTS = chartPts;
       const chartX0 = W*.08, chartX1 = W*.92;
       const chartY0 = H*.72;
 
@@ -405,11 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.beginPath(); ctx.arc(cx, cy, 13, 0, Math.PI*2);
       ctx.fillStyle = '#FFD700'; ctx.fill();
 
-      t += 0.008;
-      requestAnimationFrame(draw);
+      t += isLow ? 0.006 : 0.008;
     }
-    draw();
-    return () => { alive = false; };
+    const stop = createCanvasLoop(canvas, draw);
+    return () => { alive = false; stop(); };
   }
 
   /* ══════════════════════════════════════════════════
@@ -418,6 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function initNyaayCanvas(canvas) {
     const ctx = canvas.getContext('2d');
     let t = 0, alive = true;
+    const isLow = DEVICE.lowPower;
 
     function resize() {
       canvas.width  = canvas.offsetWidth;
@@ -426,11 +626,11 @@ document.addEventListener('DOMContentLoaded', () => {
     resize();
 
     // Nodes
-    const nodes = Array.from({ length: 11 }, () => ({
+    const nodes = Array.from({ length: isLow ? 7 : 11 }, () => ({
       x:  Math.random() * canvas.width  * .82 + canvas.width  * .09,
       y:  Math.random() * canvas.height * .78 + canvas.height * .11,
-      vx: (Math.random() - .5) * .45,
-      vy: (Math.random() - .5) * .45,
+      vx: (Math.random() - .5) * (isLow ? .28 : .45),
+      vy: (Math.random() - .5) * (isLow ? .28 : .45),
       r:  4.5 + Math.random() * 3,
       phase: Math.random() * Math.PI * 2,
     }));
@@ -455,7 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (j <= i) return;
           const dx = n2.x - n1.x, dy = n2.y - n1.y;
           const dist = Math.sqrt(dx*dx + dy*dy);
-          if (dist > 190) return;
+          if (dist > (isLow ? 150 : 190)) return;
 
           const alpha = (1 - dist/190) * .45;
 
@@ -529,11 +729,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       ctx.restore();
 
-      t += 0.016;
-      requestAnimationFrame(draw);
+      t += isLow ? 0.012 : 0.016;
     }
-    draw();
-    return () => { alive = false; };
+    const stop = createCanvasLoop(canvas, draw);
+    return () => { alive = false; stop(); };
   }
 
   /* ══════════════════════════════════════════════════
@@ -542,6 +741,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function initSkillCanvas(canvas) {
     const ctx = canvas.getContext('2d');
     let t = 0, alive = true;
+    const isLow = DEVICE.lowPower;
 
     function resize() {
       canvas.width  = canvas.offsetWidth;
@@ -549,7 +749,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     resize();
 
-    const LAYERS = [3, 5, 5, 3];
+    const LAYERS = isLow ? [3, 4, 3] : [3, 5, 5, 3];
 
     function draw() {
       if (!alive) return;
@@ -624,11 +824,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       });
 
-      t += 0.016;
-      requestAnimationFrame(draw);
+      t += isLow ? 0.012 : 0.016;
     }
-    draw();
-    return () => { alive = false; };
+    const stop = createCanvasLoop(canvas, draw);
+    return () => { alive = false; stop(); };
   }
 
   /* ══════════════════════════════════════════════════
@@ -667,6 +866,122 @@ document.addEventListener('DOMContentLoaded', () => {
      TECH STACK UNIVERSE
   ══════════════════════════════════════════════════ */
   // Tech orbit removed — replaced by techstack-universe.js WebGL engine
+
+  let mobileTechReady = false;
+  function initMobileTechStack() {
+    if (mobileTechReady || !tsMobileCarousel || !window.TECHSTACK_DATA) return;
+    mobileTechReady = true;
+
+    function openMobilePanel(tech) {
+      if (!techMobileSheet || !techMobilePanel) return;
+      const panelWrap = techMobilePanel.closest('.tech-mobile-panel');
+      if (panelWrap) panelWrap.style.setProperty('--accent', tech.accent || '#7c5cf4');
+      techMobilePanel.innerHTML = '';
+
+      const title = document.createElement('h3');
+      title.className = 'tm-title';
+      title.textContent = tech.name;
+
+      const cat = document.createElement('div');
+      cat.className = 'tm-category';
+      cat.textContent = tech.cat || 'Technology';
+
+      const desc = document.createElement('p');
+      desc.className = 'tm-desc';
+      desc.textContent = tech.desc || '';
+
+      const stats = document.createElement('div');
+      stats.className = 'tm-stats';
+      const list = (tech.stats && tech.stats.length ? tech.stats : [
+        { label: 'Experience', value: tech.years || '—' },
+        { label: 'Projects', value: tech.projects || '—' },
+        { label: 'Role', value: tech.role || '—' },
+        { label: 'Proficiency', value: tech.proficiency ? `${tech.proficiency}%` : '—' },
+      ]).slice(0, 4);
+      list.forEach(stat => {
+        const card = document.createElement('div');
+        card.className = 'tm-stat';
+        const lbl = document.createElement('div');
+        lbl.className = 'tm-stat-label';
+        lbl.textContent = stat.label;
+        const val = document.createElement('div');
+        val.className = 'tm-stat-value';
+        val.textContent = stat.value;
+        card.append(lbl, val);
+        stats.appendChild(card);
+      });
+
+      const code = document.createElement('pre');
+      code.className = 'tm-code';
+      code.textContent = tech.code || '';
+
+      const connects = document.createElement('div');
+      connects.className = 'tm-connects';
+      (tech.connects || []).slice(0, 8).forEach(name => {
+        const chip = document.createElement('span');
+        chip.className = 'tm-connect';
+        chip.textContent = name;
+        connects.appendChild(chip);
+      });
+
+      techMobilePanel.append(title, cat, desc, stats, code, connects);
+
+      techMobileSheet.classList.add('is-open');
+      techMobileSheet.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('sheet-open');
+    }
+
+    function closeMobilePanel() {
+      if (!techMobileSheet) return;
+      techMobileSheet.classList.remove('is-open');
+      techMobileSheet.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('sheet-open');
+    }
+
+    if (techMobileBackdrop) techMobileBackdrop.addEventListener('click', closeMobilePanel);
+    if (techMobileClose) techMobileClose.addEventListener('click', closeMobilePanel);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeMobilePanel();
+    });
+
+    window.TECHSTACK_DATA.forEach(tech => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'ts-mobile-card';
+      card.setAttribute('role', 'listitem');
+      card.style.setProperty('--accent', tech.accent || '#7c5cf4');
+
+      const eyebrow = document.createElement('div');
+      eyebrow.className = 'ts-mobile-card-eyebrow';
+      eyebrow.textContent = tech.cat || 'Tech';
+
+      const title = document.createElement('div');
+      title.className = 'ts-mobile-card-title';
+      title.textContent = tech.name;
+
+      const desc = document.createElement('div');
+      desc.className = 'ts-mobile-card-desc';
+      const raw = tech.desc || '';
+      desc.textContent = raw.length > 120 ? raw.slice(0, 118) + '…' : raw;
+
+      const meta = document.createElement('div');
+      meta.className = 'ts-mobile-card-meta';
+      [tech.years, tech.projects, tech.role].filter(Boolean).slice(0, 3).forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'ts-mobile-card-chip';
+        chip.textContent = item;
+        meta.appendChild(chip);
+      });
+
+      const action = document.createElement('div');
+      action.className = 'ts-mobile-card-action';
+      action.textContent = 'Tap to inspect →';
+
+      card.append(eyebrow, title, desc, meta, action);
+      card.addEventListener('click', () => openMobilePanel(tech));
+      tsMobileCarousel.appendChild(card);
+    });
+  }
 
 
   /* ══════════════════════════════════════════════════
@@ -724,6 +1039,11 @@ document.addEventListener('DOMContentLoaded', () => {
   ══════════════════════════════════════════════════ */
   document.querySelectorAll('[data-reveal]').forEach(el => {
     const delay = parseFloat(el.dataset.delay || 0);
+    if (DEVICE.prefersReducedMotion) {
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+      return;
+    }
     ScrollTrigger.create({
       trigger: el,
       start:   'top 88%',
@@ -761,12 +1081,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Tech Universe — init when section enters viewport (fires immediately on enter)
   let techUniverseDestroy = null;
+
+  if (DEVICE.isMobile) {
+    // Try immediately; if TECHSTACK_DATA isn't set yet (Three.js CDN slow),
+    // retry every 100ms for up to 2 seconds.
+    let mobileRetries = 0;
+    function tryMobileInit() {
+      if (window.TECHSTACK_DATA) {
+        initMobileTechStack();
+      } else if (mobileRetries < 20) {
+        mobileRetries++;
+        setTimeout(tryMobileInit, 100);
+      }
+    }
+    tryMobileInit();
+  } else {
+    // Fallback: even if DEVICE.isMobile is false, if the CSS mobile layout is
+    // actually visible (matchMedia check), populate the carousel anyway.
+    // This catches edge cases where JS/CSS device detection diverges.
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      initMobileTechStack();
+    }
+  }
+
   ScrollTrigger.create({
     trigger: '#techstack',
     start:   'top 100%',   // fires as soon as ANY part of the section is visible
     once:    true,
     onEnter() {
-      if (typeof window.initTechUniverse === 'function' && !techUniverseDestroy) {
+      const isMobileView = DEVICE.isMobile || window.matchMedia('(max-width: 767px)').matches;
+      if (isMobileView) {
+        // Retry on viewport enter in case the first attempt failed
+        initMobileTechStack();
+      } else if (typeof window.initTechUniverse === 'function' && !techUniverseDestroy) {
         techUniverseDestroy = window.initTechUniverse();
       }
     },
@@ -774,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Heading mouse parallax — subtle depth shift on ts-heading
   const tsHeading = document.querySelector('.ts-heading');
-  if (tsHeading) {
+  if (tsHeading && !DEVICE.isTouch) {
     window.addEventListener('mousemove', (e) => {
       const nx = (e.clientX / window.innerWidth)  * 2 - 1;
       const ny = (e.clientY / window.innerHeight) * 2 - 1;
@@ -841,26 +1188,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  addMagnetic(ctaEmail, 0.32);
-  addMagnetic(resumeBtn, 0.32);
-  addMagnetic(document.getElementById('cta-work'), 0.28);
+  if (!DEVICE.isTouch && !DEVICE.prefersReducedMotion) {
+    addMagnetic(ctaEmail, 0.32);
+    addMagnetic(resumeBtn, 0.32);
+    addMagnetic(resumeViewBtn, 0.3);
+    addMagnetic(document.getElementById('cta-work'), 0.28);
+  }
 
   /* ══════════════════════════════════════════════════
      PROJECT CARD — mouse-follow radial glow
   ══════════════════════════════════════════════════ */
-  document.querySelectorAll('.project-scene').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
+  if (!DEVICE.isTouch) {
+    document.querySelectorAll('.project-scene').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
+        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      });
     });
-  });
+  }
 
   /* ══════════════════════════════════════════════════
      MARQUEE — pause on hover
   ══════════════════════════════════════════════════ */
   const mTrack = document.querySelector('.marquee-track');
-  if (mTrack) {
+  if (mTrack && !DEVICE.isTouch) {
     mTrack.addEventListener('mouseenter', () => mTrack.style.animationPlayState = 'paused');
     mTrack.addEventListener('mouseleave', () => mTrack.style.animationPlayState = 'running');
   }
@@ -877,8 +1229,11 @@ document.addEventListener('DOMContentLoaded', () => {
       .to(el, { x: 0,  skewX: 0,  duration: .1,  ease:'none' });
   }
 
-  setInterval(() => {
-    if (Math.random() > .65) { glitch(heroN1); glitch(heroN2); }
-  }, 6200);
+  if (!DEVICE.prefersReducedMotion) {
+    const glitchInterval = DEVICE.lowPower ? 8400 : 6200;
+    setInterval(() => {
+      if (Math.random() > .65) { glitch(heroN1); glitch(heroN2); }
+    }, glitchInterval);
+  }
 
 }); // end DOMContentLoaded

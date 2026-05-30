@@ -251,8 +251,14 @@ window.initTechUniverse = (function () {
     'Interactive UI':{ h: 0xfb7185, glow: 'rgba(251,113,133,', label: '#fb7185',  dark: '#200010',  rgb: '251,113,133' },
   };
 
+  // Expose data for mobile tech stack rendering BEFORE any THREE.js usage.
+  // This ensures the mobile carousel works even if Three.js fails to load.
+  window.TECHSTACK_DATA = TECH_DATA;
+  window.TECHSTACK_COLORS = CAT_COLORS;
+
   /* ─────────────────────────────────────────────────────────────────
      SPATIAL 3D POSITIONS — hand-crafted for multi-domain coverage
+     NOTE: These use THREE.Vector3 — must come AFTER TECHSTACK_DATA export
   ───────────────────────────────────────────────────────────────── */
   const SPATIAL_POSITIONS = [
     // Frontend (left cluster, near-ground)
@@ -650,6 +656,21 @@ window.initTechUniverse = (function () {
 
   function clamp(val, min, max) {
     return Math.min(max, Math.max(min, val));
+  }
+
+  function getDeviceProfile() {
+    const ua = navigator.userAgent || '';
+    const minEdge = Math.min(window.innerWidth, window.innerHeight);
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isMobile = minEdge <= 767 || /Mobi|Android|iPhone|iPod/i.test(ua);
+    const isTablet = !isMobile && minEdge <= 1024;
+    const memory = navigator.deviceMemory || 4;
+    const cores = navigator.hardwareConcurrency || 4;
+    const lowPower = prefersReducedMotion || isMobile || memory <= 4 || cores <= 4;
+    const dprMin = isMobile ? 0.8 : (isTablet ? 1.0 : 1.25);
+    const dprMax = isMobile ? 1.0 : (isTablet ? 1.5 : 2.0);
+    return { isMobile, isTablet, isTouch, prefersReducedMotion, lowPower, memory, cores, dprMin, dprMax };
   }
 
   function hashString(str) {
@@ -2167,20 +2188,23 @@ window.initTechUniverse = (function () {
     const canvas  = document.getElementById('techstack-canvas');
     if (!section || !canvas || !window.THREE) return;
 
-    const isLowEnd = navigator.hardwareConcurrency <= 4 || /Mobile|Android/i.test(navigator.userAgent);
-    const DPR      = Math.min(window.devicePixelRatio, isLowEnd ? 1 : 2);
-    const PARTICLE_COUNT = isLowEnd ? 800 : 2500;
+    let profile = getDeviceProfile();
+    const isLowEnd = profile.lowPower;
+    let currentDpr = clamp(window.devicePixelRatio || 1, profile.dprMin, profile.dprMax);
+    const PARTICLE_COUNT = profile.isMobile ? 320 : (isLowEnd ? 800 : 2500);
+    const allowBloom = !isLowEnd;
+    const allowBokeh = !isLowEnd && !profile.isTablet && !profile.isMobile;
 
     /* ── Renderer ── */
     const renderer = new THREE.WebGLRenderer({
       canvas, antialias: !isLowEnd,
-      alpha: true, powerPreference: 'high-performance',
+      alpha: true, powerPreference: isLowEnd ? 'low-power' : 'high-performance',
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(DPR);
+    renderer.setPixelRatio(currentDpr);
     renderer.setClearColor(0x020408, 1);
     renderer.toneMapping    = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.4;
+    renderer.toneMappingExposure = isLowEnd ? 1.1 : 1.4;
 
     /* ── Scene ── */
     const scene = new THREE.Scene();
@@ -2209,11 +2233,11 @@ window.initTechUniverse = (function () {
     let composer = null;
     let bloomPass = null;
     let bokehPass = null;
-    if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+    if (allowBloom && THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
       try {
         composer = new THREE.EffectComposer(renderer);
         composer.addPass(new THREE.RenderPass(scene, camera));
-        if (THREE.BokehPass && !isLowEnd) {
+        if (THREE.BokehPass && allowBokeh) {
           bokehPass = new THREE.BokehPass(scene, camera, {
             focus: 22.0,
             aperture: 0.0006,
@@ -2224,7 +2248,7 @@ window.initTechUniverse = (function () {
         }
         bloomPass = new THREE.UnrealBloomPass(
           new THREE.Vector2(window.innerWidth, window.innerHeight),
-          isLowEnd ? 0.9 : 1.8, 0.42, 0.60
+          isLowEnd ? 0.85 : 1.8, 0.42, 0.60
         );
         composer.addPass(bloomPass);
       } catch (e) { composer = null; }
@@ -2252,9 +2276,14 @@ window.initTechUniverse = (function () {
     let currentHoverIdx = -1;
     let animFrameId = null;
     let entryProgress = 0;
+    let fpsFrames = 0;
+    let fpsElapsed = 0;
+    let inView = true;
+    let pageVisible = !document.hidden;
+    let isActive = true;
 
     const globalUniforms = { uTime: { value: 0 }, uPulse: { value: 1.0 } };
-    const bloomStrengthSpring = makeSpring(isLowEnd ? 0.9 : 1.8, 120, 16);
+    const bloomStrengthSpring = makeSpring(isLowEnd ? 0.8 : 1.8, 120, 16);
     const bokehFocusSpring = makeSpring(22, 90, 14);
     const bokehApertureSpring = makeSpring(0.0006, 120, 18);
     const bokehBlurSpring = makeSpring(0.006, 120, 18);
@@ -2269,9 +2298,11 @@ window.initTechUniverse = (function () {
     bgPlane.position.set(0, 0, -28); scene.add(bgPlane);
 
     /* ── Star field ── */
+    const starCountA = isLowEnd ? 400 : (profile.isTablet ? 1200 : 2000);
+    const starCountB = isLowEnd ? 200 : (profile.isTablet ? 500 : 800);
     [
-      { count: isLowEnd ? 600 : 2000,  spread: 100, size: 0.05, opacity: 0.55, color: 0xffffff, z: -18 },
-      { count: isLowEnd ? 300 : 800,   spread: 80,  size: 0.035, opacity: 0.35, color: 0xbbccff, z: -14 },
+      { count: starCountA, spread: 100, size: 0.05, opacity: 0.55, color: 0xffffff, z: -18 },
+      { count: starCountB, spread: 80,  size: 0.035, opacity: 0.35, color: 0xbbccff, z: -14 },
     ].forEach(cfg => {
       const pos = new Float32Array(cfg.count * 3);
       for (let i = 0; i < cfg.count; i++) {
@@ -2309,7 +2340,7 @@ window.initTechUniverse = (function () {
 
     /* ── Neural web background ── */
     const neuralWebNodes = [];
-    const nwCount = isLowEnd ? 8 : 16;
+    const nwCount = isLowEnd ? 6 : (profile.isTablet ? 12 : 16);
     for (let i = 0; i < nwCount; i++) {
       neuralWebNodes.push(new THREE.Vector3(
         (Math.random() - 0.5) * 60, (Math.random() - 0.5) * 30, -15 - Math.random() * 15
@@ -2385,14 +2416,15 @@ window.initTechUniverse = (function () {
         mesh.add(new THREE.Mesh(rGeo, new THREE.MeshBasicMaterial({ color: catColor.h, transparent: true, opacity: 0.2 })));
 
       } else if (cat === 'RAG Systems') {
-        const geo = new THREE.SphereGeometry(baseSize * 0.85, 32, 16);
+        const sphereSeg = isLowEnd ? 18 : (profile.isTablet ? 24 : 32);
+        const geo = new THREE.SphereGeometry(baseSize * 0.85, sphereSeg, Math.max(10, Math.floor(sphereSeg / 2)));
         const mat = new THREE.ShaderMaterial({
           vertexShader: entityVert, fragmentShader: vectorFrag,
           uniforms: uniBlock, transparent: true,
           depthWrite: false, blending: THREE.AdditiveBlending,
         });
         mesh = new THREE.Mesh(geo, mat);
-        const swarmN = isLowEnd ? 50 : 90;
+        const swarmN = isLowEnd ? 32 : (profile.isTablet ? 60 : 90);
         const sPos = new Float32Array(swarmN * 3);
         for (let j = 0; j < swarmN; j++) {
           const a = Math.random() * Math.PI * 2;
@@ -2410,8 +2442,10 @@ window.initTechUniverse = (function () {
 
       } else if (cat === 'Databases') {
         const grp = new THREE.Group();
+        const torusRadSeg = isLowEnd ? 8 : 12;
+        const torusTubSeg = isLowEnd ? 48 : 72;
         [0.5, 0.76, 1.02].forEach((r, ri) => {
-          const tGeo = new THREE.TorusGeometry(r * depthScale, 0.04 * depthScale, 12, 72);
+          const tGeo = new THREE.TorusGeometry(r * depthScale, 0.04 * depthScale, torusRadSeg, torusTubSeg);
           const t2 = new THREE.Mesh(tGeo, new THREE.ShaderMaterial({
             vertexShader: entityVert, fragmentShader: dbFrag,
             uniforms: { ...uniBlock }, transparent: true, side: THREE.DoubleSide,
@@ -2508,13 +2542,16 @@ window.initTechUniverse = (function () {
       [6,16],[6,11],[15,11],[16,20],        // Cross
       [0,29],[2,29],                        // 3D Web
     ];
-    CONNECTIONS.forEach(([a, b]) => {
+    const activeConnections = isLowEnd ? CONNECTIONS.filter((_, i) => i % 2 === 0) : CONNECTIONS;
+    const tubeSegs = isLowEnd ? 18 : 28;
+    const tubeRadius = isLowEnd ? 0.012 : 0.015;
+    activeConnections.forEach(([a, b]) => {
       if (a >= entities.length || b >= entities.length) return;
       const posA = entities[a].restPos, posB = entities[b].restPos;
       const mid  = posA.clone().add(posB).multiplyScalar(0.5);
       mid.y += (Math.random() - 0.5) * 5; mid.z += (Math.random() - 0.5) * 3;
       const curve   = new THREE.QuadraticBezierCurve3(posA, mid, posB);
-      const tubeGeo = new THREE.TubeGeometry(curve, 28, 0.015, 4, false);
+      const tubeGeo = new THREE.TubeGeometry(curve, tubeSegs, tubeRadius, 4, false);
       const tubeMat = new THREE.ShaderMaterial({
         vertexShader: sharedVert, fragmentShader: streamFrag,
         uniforms: {
@@ -2533,7 +2570,7 @@ window.initTechUniverse = (function () {
     });
 
     /* ── Convergence particles ── */
-    const CONV_N  = isLowEnd ? 60 : 130;
+    const CONV_N  = isLowEnd ? 40 : (profile.isTablet ? 90 : 130);
     const convPos = new Float32Array(CONV_N * 3);
     const convGeo = new THREE.BufferGeometry();
     convGeo.setAttribute('position', new THREE.BufferAttribute(convPos, 3));
@@ -2559,7 +2596,7 @@ window.initTechUniverse = (function () {
     ring2.rotation.x = Math.PI / 2;
     focusGroup.add(ring, ring2);
 
-    const orbitCount = isLowEnd ? 80 : 140;
+    const orbitCount = isLowEnd ? 60 : (profile.isTablet ? 110 : 140);
     const orbitPos = new Float32Array(orbitCount * 3);
     for (let i = 0; i < orbitCount; i++) {
       const ang = (i / orbitCount) * Math.PI * 2;
@@ -2950,7 +2987,7 @@ window.initTechUniverse = (function () {
       convOpacitySpring.target = 0;
       fillLight.intensity = 8;
       canvas.style.cursor = 'default';
-      bloomStrengthSpring.target = isLowEnd ? 0.9 : 1.8;
+      bloomStrengthSpring.target = isLowEnd ? 0.8 : 1.8;
       bokehFocusSpring.target = 22;
       bokehApertureSpring.target = 0.0006;
       bokehBlurSpring.target = 0.006;
@@ -3052,19 +3089,24 @@ window.initTechUniverse = (function () {
     /* ── Events ── */
     let screenX = 0, screenY = 0;
 
-    window.addEventListener('mousemove', e => {
-      screenX = e.clientX;
-      screenY = e.clientY;
-      const nx =  (screenX / window.innerWidth)  * 2 - 1;
-      const ny = -(screenY / window.innerHeight) * 2 + 1;
-      mouse3D.set(nx, ny);
-      holoCursorX = screenX / window.innerWidth;
-      holoCursorY = screenY / window.innerHeight;
-      cursorLight.position.set(nx * 20, ny * 12, 14);
-    }, { passive: true });
+    if (!profile.isTouch) {
+      window.addEventListener('mousemove', e => {
+        screenX = e.clientX;
+        screenY = e.clientY;
+        const nx =  (screenX / window.innerWidth)  * 2 - 1;
+        const ny = -(screenY / window.innerHeight) * 2 + 1;
+        mouse3D.set(nx, ny);
+        holoCursorX = screenX / window.innerWidth;
+        holoCursorY = screenY / window.innerHeight;
+        cursorLight.position.set(nx * 20, ny * 12, 14);
+      }, { passive: true });
+    }
 
     canvas.addEventListener('click', e => {
       clearIdleReset();
+      const nx =  (e.clientX / window.innerWidth)  * 2 - 1;
+      const ny = -(e.clientY / window.innerHeight) * 2 + 1;
+      mouse3D.set(nx, ny);
       raycaster.setFromCamera(mouse3D, camera);
       const hits = raycaster.intersectObjects(hitMeshes);
       if (hits.length > 0) {
@@ -3087,9 +3129,13 @@ window.initTechUniverse = (function () {
 
     /* ── Physics ── */
     function updatePhysics(t, dt) {
-      raycaster.setFromCamera(mouse3D, camera);
-      const hits = raycaster.intersectObjects(hitMeshes);
-      currentHoverIdx = hits.length > 0 ? hits[0].object.userData.index : -1;
+      if (!profile.isTouch) {
+        raycaster.setFromCamera(mouse3D, camera);
+        const hits = raycaster.intersectObjects(hitMeshes);
+        currentHoverIdx = hits.length > 0 ? hits[0].object.userData.index : -1;
+      } else {
+        currentHoverIdx = -1;
+      }
 
       /* Cinematic hover detection — only update if not locked by click */
       if (!isHoverLocked) {
@@ -3100,7 +3146,9 @@ window.initTechUniverse = (function () {
         }
       }
 
-      canvas.style.cursor = currentHoverIdx >= 0 ? 'pointer' : 'default';
+      if (!profile.isTouch) {
+        canvas.style.cursor = currentHoverIdx >= 0 ? 'pointer' : 'default';
+      }
 
       const mouseWorld = new THREE.Vector3(mouse3D.x * 20, mouse3D.y * 12, 0);
       const activeIdx = isHoverLocked ? selectedIdx : hoveredIdx;
@@ -3222,10 +3270,27 @@ window.initTechUniverse = (function () {
     /* FIX: clock.getElapsedTime() internally calls getDelta() which resets
        _oldTime, so calling getDelta() AFTER returns ~0 every frame —
        killing all spring physics. Call getDelta() FIRST, then read elapsedTime. */
+    function updateAdaptiveDpr(dt) {
+      fpsFrames += 1;
+      fpsElapsed += dt;
+      if (fpsElapsed < 0.6) return;
+      const fps = fpsFrames / fpsElapsed;
+      fpsFrames = 0;
+      fpsElapsed = 0;
+      if (fps < 45 && currentDpr > profile.dprMin) {
+        currentDpr = Math.max(profile.dprMin, currentDpr - 0.1);
+        renderer.setPixelRatio(currentDpr);
+      } else if (fps > 58 && !isLowEnd && currentDpr < profile.dprMax) {
+        currentDpr = Math.min(profile.dprMax, currentDpr + 0.1);
+        renderer.setPixelRatio(currentDpr);
+      }
+    }
     function tick() {
+      if (!isActive) { animFrameId = null; return; }
       animFrameId = requestAnimationFrame(tick);
       const dt = Math.min(clock.getDelta(), 0.05);
       const t  = clock.elapsedTime;
+      updateAdaptiveDpr(dt);
       globalUniforms.uTime.value = t;
 
       /* FIX: reduced from 3.5s→1.0s so hover interactions become
@@ -3260,14 +3325,14 @@ window.initTechUniverse = (function () {
       ecosystem.rotation.z = tickSpring(ecoRot.z, dt);
 
       /* ── Cinematic camera effects on hover/selection ── */
-      const isActive = hoveredIdx >= 0 || isHoverLocked;
+      const isNodeActive = hoveredIdx >= 0 || isHoverLocked;
       /* FOV narrows for telephoto depth effect when a node is active */
       const targetFOV = isHoverLocked ? 38 : (hoveredIdx >= 0 ? 42 : 45);
       camera.fov += (targetFOV - camera.fov) * 0.04;
       camera.updateProjectionMatrix();
 
       /* Camera roll: tilts subtly toward the active node for parallax */
-      const rollTarget = isActive
+      const rollTarget = isNodeActive
         ? (hoveredIdx >= 0 ? (entities[hoveredIdx]?.restPos.x || 0) : 0) * 0.003
         : Math.sin(t * 0.22) * 0.016;
       if (!camera._roll) camera._roll = 0;
@@ -3348,6 +3413,20 @@ window.initTechUniverse = (function () {
       else renderer.render(scene, camera);
     }
 
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(entries => {
+        inView = entries[0]?.isIntersecting ?? true;
+        isActive = inView && pageVisible;
+        if (isActive && !animFrameId) tick();
+      }, { threshold: 0.1 });
+      observer.observe(section);
+    }
+    document.addEventListener('visibilitychange', () => {
+      pageVisible = !document.hidden;
+      isActive = inView && pageVisible;
+      if (isActive && !animFrameId) tick();
+    });
+
     tick();
 
     /* ── Scroll trigger ── */
@@ -3370,6 +3449,9 @@ window.initTechUniverse = (function () {
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
       renderer.setSize(W, H);
+      profile = getDeviceProfile();
+      currentDpr = clamp(window.devicePixelRatio || 1, profile.dprMin, profile.dprMax);
+      renderer.setPixelRatio(currentDpr);
       if (composer) composer.setSize(W, H);
     });
 
