@@ -52,6 +52,12 @@
       <li><a href="#techstack" class="nav-link" id="nav-stack">Stack</a></li>
       <li><a href="#social"    class="nav-link" id="nav-connect">Connect</a></li>
       <li><a href="#resume"    class="nav-link" id="nav-resume">Resume</a></li>
+      <li>
+        <button class="nav-link nav-recruiter-trigger" id="nav-recruiter-btn" aria-label="Open recruiter brief" aria-expanded="false" aria-controls="recruiter-overlay">
+          <span class="nrt-dot" aria-hidden="true"></span>
+          For Recruiters
+        </button>
+      </li>
       <li><a href="#contact"   class="nav-link nav-cta" id="nav-hire">Hire Me</a></li>
     </ul>
     <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="nav-mobile">
@@ -73,6 +79,12 @@
         <li><a href="#techstack" class="nav-mobile-link">Stack</a></li>
         <li><a href="#social"    class="nav-mobile-link">Connect</a></li>
         <li><a href="#resume"    class="nav-mobile-link">Resume</a></li>
+        <li>
+          <button class="nav-mobile-link nav-mobile-recruiter" id="nav-mobile-recruiter-btn" aria-label="Open recruiter brief">
+            <span>For Recruiters</span>
+            <span class="nmr-dot" aria-hidden="true"></span>
+          </button>
+        </li>
         <li><a href="#contact"   class="nav-mobile-link nav-mobile-cta">Hire Me</a></li>
       </ul>
     </div>
@@ -102,6 +114,11 @@
       <div class="hero-ctas" id="hero-ctas">
         <a href="#projects" class="btn btn-primary" id="cta-work">View My Work</a>
         <a href="#contact"  class="btn btn-ghost"   id="cta-contact">Get In Touch</a>
+        <button class="btn-recruiter-hero" id="hero-recruiter-btn" aria-label="Open recruiter brief" aria-expanded="false" aria-controls="recruiter-overlay">
+          <span class="brh-dot" aria-hidden="true"></span>
+          <span class="brh-text">For Recruiters</span>
+          <span class="brh-arrow" aria-hidden="true">↗</span>
+        </button>
       </div>
     </div>
 
@@ -465,7 +482,7 @@
           Open to full-time roles, freelance engagements,<br>
           and ideas too ambitious for a brief.
         </p>
-        <a href="mailto:yashvin@example.com" class="btn btn-primary btn-xl" id="cta-email" aria-label="Email Yashvin Mehra">
+        <a href="mailto:yashvinmehra@gmail.com?subject=Hello%20Yashvin&body=Hi%20Yashvin%2C%0A%0A" class="btn btn-primary btn-xl" id="cta-email" aria-label="Email Yashvin Mehra">
           Say hello <span class="btn-arrow" aria-hidden="true">→</span>
         </a>
       </div>
@@ -483,6 +500,207 @@
       </nav>
     </div>
   </footer>
+
+  <!-- ══════════════════════════════════════════════════
+       RECRUITER BRIEF OVERLAY — Isolated from main flow
+  ══════════════════════════════════════════════════ -->
+  <div id="recruiter-overlay" class="rb-overlay" role="dialog" aria-modal="true" aria-label="Recruiter Brief — Yashvin Mehra" aria-hidden="true">
+
+    <!-- Ambient background layers -->
+    <div class="rb-bg" aria-hidden="true">
+      <div class="rb-bg-grid"></div>
+      <div class="rb-bg-nebula"></div>
+      <canvas id="rb-canvas" class="rb-canvas" aria-hidden="true"></canvas>
+    </div>
+
+    <!-- Close -->
+    <button class="rb-close" id="rb-close" aria-label="Close recruiter brief">
+      <span class="rb-close-line"></span>
+      <span class="rb-close-line"></span>
+    </button>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="rb-shortcut" aria-hidden="true"><kbd>Esc</kbd> to close</div>
+
+    <!-- ── Main content ── -->
+    <div class="rb-content" id="rb-content">
+
+      <!-- Header row -->
+      <header class="rb-header">
+        <div class="rb-header-left">
+          <div class="rb-eyebrow">
+            <span class="rb-eyebrow-line" aria-hidden="true"></span>
+            <span class="rb-eyebrow-label">Executive Brief</span>
+            <span class="rb-live" aria-hidden="true">
+              <span class="rb-live-dot"></span>
+              <span>Available</span>
+            </span>
+          </div>
+          <h1 class="rb-name">Yashvin<br><span class="rb-name-accent">Mehra</span></h1>
+          <p class="rb-role">AI &amp; Data Science Engineer</p>
+        </div>
+        <div class="rb-header-right" aria-hidden="true">
+          <div class="rb-monogram">YM</div>
+        </div>
+      </header>
+
+      <!-- ── Grid body ── -->
+      <div class="rb-grid">
+
+        <!-- Row 1: Full width -->
+        <div class="rb-full-width">
+          <!-- Executive Summary -->
+          <section class="rb-block" aria-label="Executive summary">
+            <h2 class="rb-block-label"><span class="rb-block-num">01</span> Executive Summary</h2>
+            <p class="rb-summary-text">
+              I'm a full-stack engineer focused on building reliable backend systems and AI-powered applications. My work spans FastAPI, React, PostgreSQL, Redis, and cloud-based deployments, with experience designing secure APIs, scalable architectures, and production-ready workflows. I've built end-to-end products ranging from legal-tech platforms to AI-driven automation systems, combining software engineering principles with practical AI integration. I enjoy solving real-world problems through clean architecture, efficient systems, and user-focused development.
+            </p>
+          </section>
+        </div>
+
+        <!-- Row 2: Side by Side (Education | Core Stack) -->
+        <div class="rb-col">
+          <!-- Education -->
+          <section class="rb-block" aria-label="Education">
+            <h2 class="rb-block-label"><span class="rb-block-num">02</span> Education</h2>
+            <p class="rb-block-title">B.E. Artificial Intelligence<br>&amp; Data Science</p>
+            <p class="rb-block-sub">Savitribai Phule Pune University<br>CGPA: 8.4</p>
+          </section>
+        </div>
+        <div class="rb-col">
+          <section class="rb-block rb-stack-block" aria-label="Core technologies">
+            <h2 class="rb-block-label"><span class="rb-block-num">04</span> Core Stack</h2>
+            <div class="rb-stack-grid">
+              <div class="rb-stack-item" data-lang="Python">Python</div>
+              <div class="rb-stack-item" data-lang="FastAPI">FastAPI</div>
+              <div class="rb-stack-item" data-lang="React">React</div>
+              <div class="rb-stack-item" data-lang="Next.js">Next.js</div>
+              <div class="rb-stack-item" data-lang="TypeScript">TypeScript</div>
+              <div class="rb-stack-item" data-lang="SQL">SQL</div>
+              <div class="rb-stack-item" data-lang="ML">Machine Learning</div>
+              <div class="rb-stack-item" data-lang="DataScience">Data Science</div>
+              <div class="rb-stack-item" data-lang="DeepLearning">Deep Learning</div>
+              <div class="rb-stack-item" data-lang="Cloud">Cloud Computing</div>
+              <div class="rb-stack-item" data-lang="HTMLCSS">HTML &amp; CSS</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Row 3: Side by Side (Featured Projects | Key Achievements) -->
+        <div class="rb-col">
+          <section class="rb-block" aria-label="Featured projects">
+            <h2 class="rb-block-label"><span class="rb-block-num">03</span> Featured Projects</h2>
+            <div class="rb-projects">
+              <a href="https://nyaay-path-ai.vercel.app/" target="_blank" rel="noopener" class="rb-project" id="rbp-nyaay">
+                <div class="rb-project-dot" style="background:#F97316"></div>
+                <div class="rb-project-info">
+                  <span class="rb-project-name">NyaayPath AI</span>
+                  <span class="rb-project-tag">AI × Legal-Tech</span>
+                </div>
+                <span class="rb-project-arrow">→</span>
+              </a>
+              <a href="https://github.com/Yashvin12/Closira" target="_blank" rel="noopener" class="rb-project" id="rbp-closira">
+                <div class="rb-project-dot" style="background:#10B981"></div>
+                <div class="rb-project-info">
+                  <span class="rb-project-name">Closira</span>
+                  <span class="rb-project-tag">AI Engineering</span>
+                </div>
+                <span class="rb-project-arrow">→</span>
+              </a>
+              <a href="https://github.com/Yashvin12/Drishti-Poahan" target="_blank" rel="noopener" class="rb-project" id="rbp-drishti">
+                <div class="rb-project-dot" style="background:#EC4899"></div>
+                <div class="rb-project-info">
+                  <span class="rb-project-name">Drishti Poshan</span>
+                  <span class="rb-project-tag">AI × Health-Tech</span>
+                </div>
+                <span class="rb-project-arrow">→</span>
+              </a>
+              <a href="https://github.com/Yashvin12/Aurum" target="_blank" rel="noopener" class="rb-project" id="rbp-aurum">
+                <div class="rb-project-dot" style="background:#D4AF37"></div>
+                <div class="rb-project-info">
+                  <span class="rb-project-name">Aurum</span>
+                  <span class="rb-project-tag">AI × Finance</span>
+                </div>
+                <span class="rb-project-arrow">→</span>
+              </a>
+            </div>
+          </section>
+        </div>
+        <div class="rb-col">
+          <!-- Achievements -->
+          <section class="rb-block" aria-label="Key Achievements">
+            <h2 class="rb-block-label"><span class="rb-block-num">05</span> Key Achievements</h2>
+            <ul class="rb-achievements-list">
+              <li class="rb-achievement-item">
+                <span class="rb-achievement-icon">🏆</span>
+                <div class="rb-achievement-content">
+                  <strong class="rb-achievement-title">Hackathon Finalist &amp; Lead</strong>
+                  <p class="rb-achievement-desc">Finalist &amp; Team Lead at the National-Level Pragyantra Hackathon, leading design &amp; team execution.</p>
+                </div>
+              </li>
+              <li class="rb-achievement-item">
+                <span class="rb-achievement-icon">⚡</span>
+                <div class="rb-achievement-content">
+                  <strong class="rb-achievement-title">NyaayPath AI Platform</strong>
+                  <p class="rb-achievement-desc">Built &amp; deployed a full-stack legal RAG platform with FastAPI, React, PostgreSQL &amp; Redis.</p>
+                </div>
+              </li>
+              <li class="rb-achievement-item">
+                <span class="rb-achievement-icon">🥇</span>
+                <div class="rb-achievement-content">
+                  <strong class="rb-achievement-title">NPTEL Gold Elite</strong>
+                  <p class="rb-achievement-desc">Gold Elite Certified in Neural Networks for Computer Vision and Natural Language Processing.</p>
+                </div>
+              </li>
+              <li class="rb-achievement-item">
+                <span class="rb-achievement-icon">☁️</span>
+                <div class="rb-achievement-content">
+                  <strong class="rb-achievement-title">AWS Cloud Certified</strong>
+                  <p class="rb-achievement-desc">Earned AWS Academy Cloud Foundations certification for infrastructure &amp; cloud deployments.</p>
+                </div>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <!-- Row 4: Full width -->
+        <div class="rb-full-width">
+          <!-- Current Focus -->
+          <section class="rb-block" aria-label="Current focus">
+            <h2 class="rb-block-label"><span class="rb-block-num">06</span> Currently Building</h2>
+            <div class="rb-tags">
+              <span class="rb-tag rb-tag--glow">AI Systems</span>
+              <span class="rb-tag">Full-Stack Apps</span>
+              <span class="rb-tag">Automation</span>
+              <span class="rb-tag">Product Eng.</span>
+            </div>
+          </section>
+        </div>
+
+      </div><!-- /rb-grid -->
+
+      <!-- ── Action row ── -->
+      <footer class="rb-footer">
+        <a href="FullStack_Resume_Yashvin.pdf" target="_blank" rel="noopener noreferrer" class="rb-action rb-action--primary" id="rb-btn-resume">
+          <span class="rb-action-icon">↓</span>
+          Resume
+        </a>
+        <a href="https://github.com/Yashvin12" target="_blank" rel="noopener" class="rb-action" id="rb-btn-github">
+          <span class="rb-action-icon">↗</span>
+          GitHub
+        </a>
+        <a href="https://www.linkedin.com/in/yashvin-mehra-7a97b1322" target="_blank" rel="noopener" class="rb-action" id="rb-btn-linkedin">
+          <span class="rb-action-icon">↗</span>
+          LinkedIn
+        </a>
+        <a href="mailto:yashvinmehra@gmail.com?subject=Hello%20Yashvin&body=Hi%20Yashvin%2C%0A%0A" class="rb-action" id="rb-btn-email">
+          <span class="rb-action-icon">✉</span>
+          Email
+        </a>
+      </footer>
+
+    </div><!-- /rb-content -->
+  </div><!-- /recruiter-overlay -->
 
   <!-- ── Scripts ────────────────────────────────────── -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>

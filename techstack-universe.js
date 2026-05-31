@@ -2188,6 +2188,30 @@ window.initTechUniverse = (function () {
     const canvas  = document.getElementById('techstack-canvas');
     if (!section || !canvas || !window.THREE) return;
 
+    // ── Mobile guard: never run the WebGL engine on mobile ──
+    // On mobile, .techstack-sticky is display:none and the mobile
+    // carousel is shown instead. Running WebGL on a hidden canvas
+    // wastes resources and can cause a black-screen artefact.
+    const isMobileNow = window.matchMedia('(max-width: 767px)').matches
+      || window.innerWidth <= 767
+      || /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent);
+    if (isMobileNow) {
+      console.log('[Portfolio] initTechUniverse: mobile detected \u2014 skipping WebGL init.');
+      return;
+    }
+
+    // ── Canvas visibility guard ──
+    const stickyEl = document.getElementById('techstack-sticky');
+    if (stickyEl) {
+      const stickyStyle = window.getComputedStyle(stickyEl);
+      if (stickyStyle.display === 'none' || stickyStyle.visibility === 'hidden') {
+        console.log('[Portfolio] initTechUniverse: techstack-sticky is hidden \u2014 skipping WebGL init.');
+        return;
+      }
+    }
+
+    console.log('[Portfolio] initTechUniverse: starting WebGL engine. W:', window.innerWidth, 'H:', window.innerHeight);
+
     let profile = getDeviceProfile();
     const isLowEnd = profile.lowPower;
     let currentDpr = clamp(window.devicePixelRatio || 1, profile.dprMin, profile.dprMax);
@@ -2205,6 +2229,20 @@ window.initTechUniverse = (function () {
     renderer.setClearColor(0x020408, 1);
     renderer.toneMapping    = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = isLowEnd ? 1.1 : 1.4;
+
+    // ── WebGL context loss detection ──
+    // Mobile GPUs can silently kill the WebGL context when under memory pressure.
+    // This ensures we catch and log the failure rather than displaying a black canvas.
+    canvas.addEventListener('webglcontextlost', (e) => {
+      e.preventDefault();
+      console.error('[Portfolio] WebGL context lost! The Tech Stack Universe canvas went black. This typically means the GPU ran out of memory on this device.');
+      isActive = false;
+    }, false);
+    canvas.addEventListener('webglcontextrestored', () => {
+      console.log('[Portfolio] WebGL context restored \u2014 restarting render loop.');
+      isActive = true;
+      if (!animFrameId) tick();
+    }, false);
 
     /* ── Scene ── */
     const scene = new THREE.Scene();
